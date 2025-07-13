@@ -1,0 +1,96 @@
+﻿@model Book
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>Book</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Isbn10" class="control-label"></label>
+                <input asp-for="Isbn10" class="form-control" />
+                <span asp-validation-for="Isbn10" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Isbn13" class="control-label"></label>
+                <input asp-for="Isbn13" class="form-control" />
+                <span asp-validation-for="Isbn13" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Subtitle" class="control-label"></label>
+                <input asp-for="Subtitle" class="form-control" />
+                <span asp-validation-for="Subtitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PublishedDate" class="control-label"></label>
+                <input asp-for="PublishedDate" type="date" class="form-control" />
+                <span asp-validation-for="PublishedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PageCount" class="control-label"></label>
+                <input asp-for="PageCount" class="form-control" />
+                <span asp-validation-for="PageCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Language" class="control-label"></label>
+                <input asp-for="Language" class="form-control" />
+                <span asp-validation-for="Language" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AverageRating" class="control-label"></label>
+                <input asp-for="AverageRating" class="form-control" type="number" step="0.1" />
+                <span asp-validation-for="AverageRating" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RatingsCount" class="control-label"></label>
+                <input asp-for="RatingsCount" class="form-control" />
+                <span asp-validation-for="RatingsCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ThumbnailUrl" class="control-label"></label>
+                <input asp-for="ThumbnailUrl" class="form-control" />
+                <span asp-validation-for="ThumbnailUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Authors</label>
+                <select asp-for="AuthorIds" class ="form-control form-select" multiple="multiple" asp-items="ViewBag.Authors"></select>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Publisher</label>
+                <select asp-for="PublisherId" class ="form-control" asp-items="ViewBag.Publishers"></select>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Categories</label>
+                <select asp-for="CategoryIds" class="form-control form-select" multiple="multiple" asp-items="ViewBag.Categories"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
