@@ -1,13 +1,8 @@
-﻿using LibraryApplication.Domain.Domain;
-using LibraryApplication.Repository.Data;
-using LibraryApplication.Service.Interface;
+﻿using LibraryApplication.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 
 namespace LibraryApplication.Web.Controllers
 {
@@ -17,13 +12,15 @@ namespace LibraryApplication.Web.Controllers
         private readonly IAuthorService _authorService;
         private readonly IPublisherService _publisherService;
         private readonly ICategoryService _categoryService;
+        private readonly ILoanService _loanService;
 
-        public BooksController(IBookService bookService, IAuthorService authorService, IPublisherService publisherService, ICategoryService categoryService)
+        public BooksController(IBookService bookService, IAuthorService authorService, IPublisherService publisherService, ICategoryService categoryService, ILoanService loanService)
         {
             _bookService=bookService;
             _authorService=authorService;
             _publisherService=publisherService;
             _categoryService=categoryService;
+            _loanService=loanService;
         }
 
         // GET: Books
@@ -39,8 +36,17 @@ namespace LibraryApplication.Web.Controllers
             if (book == null)
             {
                 return NotFound();
+            }            
+            var loan = _loanService.GetActiveLoanForBook(book.Id);
+            if (loan!=null)
+            {            
+                ViewData["LoanId"] = loan.Id;
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!userId.IsNullOrEmpty())
+                    ViewData["UsersLoan"] = userId.Equals(loan.UserId);
             }
-
+            else
+                ViewData["UsersLoan"] = false;
             return View(book);
         }
 

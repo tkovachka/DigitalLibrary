@@ -23,6 +23,7 @@ public class Book : BaseEntity
     public string? Description { get; set; }
     [Url]
     public string? ThumbnailUrl { get; set; }
+    public bool IsAvailable { get; set; } = true;
     public Guid PublisherId { get; set; }
     public virtual Publisher? Publisher { get; set; }
     [NotMapped]        

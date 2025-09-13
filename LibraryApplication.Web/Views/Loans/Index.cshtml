@@ -1,0 +1,101 @@
+﻿@model IEnumerable<LibraryApplication.Domain.Domain.Loan>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var history = ViewBag.History as List<LibraryApplication.Domain.Domain.Loan>;
+}
+
+<h1>My Active Loans</h1>
+@if(Model!=null && Model.Any()){
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.BorrowedBook)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateBorrowed)
+            </th>
+            <th>Days of Loan Left</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                <img style="height:200px" src="@item.BorrowedBook.ThumbnailUrl"/>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BorrowedBook.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateBorrowed)
+            </td>
+            <td>
+                Fix this
+            </td>
+            <td>
+                <a class="btn btn-warning" asp-action="Return" asp-route-id="@item.Id">Return Book</a> 
+                <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a> 
+            </td>
+        </tr>
+}
+    </tbody>
+    </table>
+}
+else
+{
+    <p>You have no active loans. Make a new loan! <a asp-action="Index" asp-controller="Books">Go to all books</a></p>
+}
+<br />
+<hr />
+<h2>History</h2>
+@if(history!=null && history.Any()){
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                    @Html.DisplayNameFor(model => model.BorrowedBook)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserId)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateBorrowed)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateReturned)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in history)
+            {
+                <tr>
+                    <td>
+                        <img style="height:200px" src="@item.BorrowedBook.ThumbnailUrl" />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BorrowedBook.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.UserId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateBorrowed)
+                    </td>
+                    <td class="col-sm-10">
+                        @Html.DisplayFor(modelItem => item.DateReturned)
+                    </td>
+                   
+                </tr>
+            }
+        </tbody>
+    </table>
+} else {
+    <p>You have no finished loans yet!</p>
+}

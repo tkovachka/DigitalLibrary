@@ -11,8 +11,29 @@
     <h4>Book Details</h4>
     <div>
         <a asp-action="Index" class="btn btn-info">Back to List</a>
-        <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.Id">Edit</a>
-        <a asp-action="Delete" class="btn btn-danger" asp-route-id="@Model?.Id">Delete</a>
+        <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model.Id">Edit</a>
+        <a asp-action="Delete" class="btn btn-danger" asp-route-id="@Model.Id">Delete</a>
+        @if (ViewBag.UsersLoan)
+        {
+            <form asp-controller="Loans" asp-action="Return" method="get" style="display:inline;">
+                <input type="hidden" name="id" value="@ViewBag.LoanId" />
+                <button type="submit" class="btn btn-warning">Return Book</button>
+            </form>
+        }
+        else if (Model.IsAvailable)
+        {
+            <form asp-controller="Loans" asp-action="Loan" method="post" style="display:inline;">
+                <input type="hidden" name="bookId" value="@Model.Id" />
+                <button type="submit" class="btn btn-success">Loan Book</button>
+            </form>
+        }
+        else
+        {
+            <form asp-controller="Reservations" asp-action="Reserve" method="post" style="display:inline;">
+                <input type="hidden" name="bookId" value="@Model.Id" />
+                <button type="submit" class="btn btn-warning">Reserve Book</button>
+            </form>
+        }
     </div>
     <hr />
     <dl class="row">

@@ -1,0 +1,59 @@
+﻿@model LibraryApplication.Domain.Domain.Loan
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Loan</h4>        
+    <a asp-action="Index">Back to List</a>
+    <div>
+        <form method="post" asp-action="Return">
+            <input hidden name="id" value="@Model.Id" />
+            <input type="submit" value="Return Book" class="btn btn-warning" />
+        </form>
+    </div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.BorrowedBook)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.BorrowedBook.Isbn10)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.UserId)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.UserId)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateBorrowed)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DateBorrowed)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateReturned)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.DateReturned != null)
+            {
+                @Html.DisplayFor(model => model.DateReturned)
+            }
+            else
+            {
+                @:Not Returned yet
+            }
+        </dd>
+        <dt class="col-sm-2">
+            Book Cover
+        </dt>
+        <dd class="col-sm-10">
+            <img src="@Model.BorrowedBook.ThumbnailUrl" />
+        </dd>
+    </dl>
+</div>

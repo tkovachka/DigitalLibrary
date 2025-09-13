@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LibraryApplication.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -277,10 +277,10 @@ namespace LibraryApplication.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BorrowedBookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateBorrowed = table.Column<DateOnly>(type: "date", nullable: false),
-                    DateReturned = table.Column<DateOnly>(type: "date", nullable: false),
+                    DateReturned = table.Column<DateOnly>(type: "date", nullable: true),
                     LibraryApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
@@ -292,8 +292,8 @@ namespace LibraryApplication.Repository.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Loans_Books_BookId",
-                        column: x => x.BookId,
+                        name: "FK_Loans_Books_BorrowedBookId",
+                        column: x => x.BorrowedBookId,
                         principalTable: "Books",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -308,8 +308,8 @@ namespace LibraryApplication.Repository.Migrations
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     QueuePosition = table.Column<int>(type: "int", nullable: false),
                     DateRequested = table.Column<DateOnly>(type: "date", nullable: false),
-                    ActivationDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    ExpirationDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    ActivationDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    ExpirationDate = table.Column<DateOnly>(type: "date", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     LibraryApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
@@ -384,9 +384,9 @@ namespace LibraryApplication.Repository.Migrations
                 column: "PublisherId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Loans_BookId",
+                name: "IX_Loans_BorrowedBookId",
                 table: "Loans",
-                column: "BookId");
+                column: "BorrowedBookId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Loans_LibraryApplicationUserId",

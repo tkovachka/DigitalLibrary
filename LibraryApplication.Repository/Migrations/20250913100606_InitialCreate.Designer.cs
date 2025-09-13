@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryApplication.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250713115820_updateBookModel")]
-    partial class updateBookModel
+    [Migration("20250913100606_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,16 +46,8 @@ namespace LibraryApplication.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AuthorIds")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<double?>("AverageRating")
                         .HasColumnType("float");
-
-                    b.Property<string>("CategoryIds")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2048)
@@ -157,13 +149,13 @@ namespace LibraryApplication.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BookId")
+                    b.Property<Guid>("BorrowedBookId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateOnly>("DateBorrowed")
                         .HasColumnType("date");
 
-                    b.Property<DateOnly>("DateReturned")
+                    b.Property<DateOnly?>("DateReturned")
                         .HasColumnType("date");
 
                     b.Property<string>("LibraryApplicationUserId")
@@ -174,7 +166,7 @@ namespace LibraryApplication.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BookId");
+                    b.HasIndex("BorrowedBookId");
 
                     b.HasIndex("LibraryApplicationUserId");
 
@@ -202,7 +194,7 @@ namespace LibraryApplication.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly>("ActivationDate")
+                    b.Property<DateOnly?>("ActivationDate")
                         .HasColumnType("date");
 
                     b.Property<Guid>("BookId")
@@ -211,7 +203,7 @@ namespace LibraryApplication.Repository.Migrations
                     b.Property<DateOnly>("DateRequested")
                         .HasColumnType("date");
 
-                    b.Property<DateOnly>("ExpirationDate")
+                    b.Property<DateOnly?>("ExpirationDate")
                         .HasColumnType("date");
 
                     b.Property<bool>("IsActive")
@@ -487,7 +479,7 @@ namespace LibraryApplication.Repository.Migrations
                 {
                     b.HasOne("Book", "BorrowedBook")
                         .WithMany("Loans")
-                        .HasForeignKey("BookId")
+                        .HasForeignKey("BorrowedBookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

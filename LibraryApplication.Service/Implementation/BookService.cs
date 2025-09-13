@@ -22,6 +22,7 @@ namespace LibraryApplication.Service.Implementation
 
         public Book Add(Book book)
         {
+            book.IsAvailable = true;
             return _repository.Insert(book);
         }
 

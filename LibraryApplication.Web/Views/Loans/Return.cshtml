@@ -1,0 +1,46 @@
+﻿@model LibraryApplication.Domain.Domain.Loan
+
+@{
+    ViewData["Title"] = "Return";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Return</h1>
+
+<h3>Are you sure you want to return this book?</h3>
+<div>
+    <h4>Loan</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Book Cover
+        </dt>
+        <dd class="col-sm-10">
+            <img src="@Model.BorrowedBook.ThumbnailUrl" style="height:300px;"/>
+        </dd>
+        <dt class = "col-sm-2">
+            Book Title
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BorrowedBook.Title)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateBorrowed)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DateBorrowed)
+        </dd>
+        <dt class = "col-sm-2">
+            Days Remaining
+        </dt>
+        <dd class = "col-sm-10">
+            Fix this
+        </dd>
+    </dl>
+    
+    <form asp-action="ReturnConfirmation">
+        <input type="hidden" asp-for="Id" />
+        <input class="btn btn-danger" type="submit" value="Return" /> 
+        <a asp-action="Index" asp-controller="Books">Cancel and go to All Books</a>
+    </form>
+</div>

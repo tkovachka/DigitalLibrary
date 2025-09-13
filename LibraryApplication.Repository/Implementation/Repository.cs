@@ -66,7 +66,8 @@ namespace LibraryApplication.Repository.Implementation
         public IEnumerable<E> GetAll<E>(Expression<Func<T, E>> selector,
             Expression<Func<T, bool>>? predicate = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            bool asNoTracking = false)
         {
             IQueryable<T> query = entites;
 
@@ -78,6 +79,11 @@ namespace LibraryApplication.Repository.Implementation
             if (predicate != null)
             {
                 query = query.Where(predicate);
+            }
+
+            if (asNoTracking)
+            {
+                query = query.AsNoTracking();
             }
 
             if (orderBy != null)
