@@ -11,7 +11,7 @@ namespace LibraryApplication.Service.Interface
     {
         Loan? GetById(Guid loanId);
         Loan? Update(Loan loan);
-        Loan LoanBook(Guid bookId, string userId);        
+        Loan LoanBook(Guid bookId, string userId, Reservation fromReservation);        
         void ReturnBook(Guid loanId, string userId);      
         List<Loan> GetLoansByUser(string userId);
         List<Loan> GetLoansHistoryByUser(string userId);

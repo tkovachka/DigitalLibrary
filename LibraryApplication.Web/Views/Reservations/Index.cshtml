@@ -5,34 +5,20 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>My Reservations</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
+            <th></th>
             <th>
-                @Html.DisplayNameFor(model => model.Book)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UserId)
+                @Html.DisplayNameFor(model => model.Book.Title)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.QueuePosition)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.DateRequested)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ActivationDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExpirationDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsActive)
             </th>
             <th></th>
         </tr>
@@ -41,10 +27,10 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Book.Isbn10)
+                <img src="@item.Book.ThumbnailUrl" style="height:200px;"/>
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.UserId)
+                @Html.DisplayFor(modelItem => item.Book.Title)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.QueuePosition)
@@ -53,18 +39,7 @@
                 @Html.DisplayFor(modelItem => item.DateRequested)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ActivationDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExpirationDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
             </td>
         </tr>
 }

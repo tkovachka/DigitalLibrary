@@ -1,8 +1,6 @@
 ﻿using LibraryApplication.Domain.Domain;
-using LibraryApplication.Domain.Identity;
 using LibraryApplication.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -12,10 +10,14 @@ namespace LibraryApplication.Web.Controllers
     public class LoansController : Controller
     {
         private readonly ILoanService _loanService;
+        private readonly IReservationService _reservationService;
+        private readonly IBookService _bookService;
 
-        public LoansController(ILoanService loanService)
+        public LoansController(ILoanService loanService, IReservationService reservationService, IBookService bookService)
         {
             _loanService=loanService;
+            _reservationService=reservationService;
+            _bookService=bookService;
         }
 
         // GET: Loans for current logged in user
@@ -29,15 +31,24 @@ namespace LibraryApplication.Web.Controllers
             return View(activeLoans);
         }
 
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Loan(Guid bookId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var model = _bookService.GetById(bookId);
+            if (model == null) return NotFound();
+            ViewData["FromReservation"] = _reservationService.GetReservationsByUser(userId).Any(x => x.BookId.Equals(bookId));
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult LoanConfirm(Guid bookId, Reservation fromReservation)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (fromReservation == null) return NotFound("Reservation not found");
             try
             {
-                _loanService.LoanBook(bookId, userId);
+                _loanService.LoanBook(bookId, userId, fromReservation);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)

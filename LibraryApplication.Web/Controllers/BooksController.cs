@@ -13,14 +13,16 @@ namespace LibraryApplication.Web.Controllers
         private readonly IPublisherService _publisherService;
         private readonly ICategoryService _categoryService;
         private readonly ILoanService _loanService;
+        private readonly IReservationService _reservationService;
 
-        public BooksController(IBookService bookService, IAuthorService authorService, IPublisherService publisherService, ICategoryService categoryService, ILoanService loanService)
+        public BooksController(IBookService bookService, IAuthorService authorService, IPublisherService publisherService, ICategoryService categoryService, ILoanService loanService, IReservationService reservationService)
         {
             _bookService=bookService;
             _authorService=authorService;
             _publisherService=publisherService;
             _categoryService=categoryService;
             _loanService=loanService;
+            _reservationService=reservationService;
         }
 
         // GET: Books
@@ -34,19 +36,42 @@ namespace LibraryApplication.Web.Controllers
         {
             var book = _bookService.GetById(id);
             if (book == null)
-            {
                 return NotFound();
-            }            
-            var loan = _loanService.GetActiveLoanForBook(book.Id);
-            if (loan!=null)
-            {            
-                ViewData["LoanId"] = loan.Id;
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (!userId.IsNullOrEmpty())
-                    ViewData["UsersLoan"] = userId.Equals(loan.UserId);
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            ViewData["LoanId"] = null;
+            ViewData["ReservationId"] = null;
+            ViewData["UsersLoan"] = false;
+            ViewData["UsersReservation"] = false;
+            ViewData["ActiveReservation"] = false;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var loan = _loanService.GetActiveLoanForBook(book.Id);
+                if (loan != null)
+                {
+                    if (string.Equals(loan.UserId, userId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ViewData["LoanId"] = loan.Id;
+                        ViewData["UsersLoan"] = true;
+                    }
+                    else
+                    {
+                        var reservation = _reservationService
+                            .GetReservationsByUser(userId)
+                            .FirstOrDefault(x => x.BookId.Equals(book.Id));
+
+                        if (reservation != null)
+                        {
+                            ViewData["UsersReservation"] = true;
+                            ViewData["ReservationId"] = reservation.Id;
+                            if (reservation.IsActive)
+                                ViewData["ActiveReservation"] = true;
+                        }
+                    }
+                }
             }
-            else
-                ViewData["UsersLoan"] = false;
             return View(book);
         }
 

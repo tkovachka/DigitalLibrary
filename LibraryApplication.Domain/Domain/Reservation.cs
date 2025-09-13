@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LibraryApplication.Domain.Domain
 {
@@ -17,8 +12,5 @@ namespace LibraryApplication.Domain.Domain
         public DateOnly? ActivationDate { get; set; }
         public DateOnly? ExpirationDate { get; set; }
         public bool IsActive { get; set; }
-        [NotMapped]
-        public bool IsExpired => ExpirationDate.HasValue && ExpirationDate.Value < DateOnly.FromDateTime(DateTime.UtcNow);
-
     }
 }

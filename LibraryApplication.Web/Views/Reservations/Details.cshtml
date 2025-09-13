@@ -1,0 +1,63 @@
+﻿@model LibraryApplication.Domain.Domain.Reservation
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Reservation</h4>
+    <div>
+        @if (Model.IsActive)
+        {
+            <h3>It is now your turn to Loan the book!</h3>
+            <a class="btn btn-success" asp-action="Loan" asp-controller="Loans" asp-route-bookId="@Model.BookId">Loan now!</a>
+        }
+        <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn btn-danger">Cancel Reservation</a>
+        <a asp-action="Index">Back to List</a>
+    </div>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Book.Title)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Book.Title)
+        </dd>
+        <dt class="col-sm-2">
+            Authors
+        </dt>
+        <dd class="col-sm-10">
+            <ul class="list-unstyled mb-2">
+                @foreach (var author in @Model.Book.Authors)
+                {
+                    <li>@author.Name</li>
+                }
+            </ul>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Book.Isbn13)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Book.Isbn13)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.QueuePosition)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.QueuePosition)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateRequested)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DateRequested)
+        </dd>
+        <dt>Cover</dt>
+        <dd>
+            <img src="@Model.Book.ThumbnailUrl"/>
+        </dd>
+    </dl>
+</div>

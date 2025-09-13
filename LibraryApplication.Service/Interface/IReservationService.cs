@@ -10,7 +10,7 @@ namespace LibraryApplication.Service.Interface
 {
     public interface IReservationService
     {
-        Reservation? Get(Guid reservationId);
+        Reservation? GetById(Guid reservationId);
         Reservation? Delete(Reservation reservation);
         Reservation? Update(Reservation reservation);
         Reservation Insert(Reservation reservation);
@@ -19,5 +19,6 @@ namespace LibraryApplication.Service.Interface
         void CancelReservation(Guid reservationId, string userId);
         List<Reservation> GetQueueForBook(Guid bookId);
         void ActivateReservation(Guid reservationId, string userId);
+        void FulfillReservation(Guid reservationId, string userId);
     }
 }

@@ -1,8 +1,10 @@
 ﻿using LibraryApplication.Domain.Domain;
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -25,20 +27,34 @@ namespace LibraryApplication.Service.Implementation
 
         public void CancelReservation(Guid reservationId, string userId)
         {
-            var r = Get(reservationId);
+            var r = GetById(reservationId);
             if (r == null) throw new Exception("Reservation not found");
             if (!string.Equals(r.UserId, userId, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Not allowed to cancel this reservation.");
-            
+
+            bool isActive = r.IsActive;
             Delete(r);
 
+            //if reservation is active, activate the next in queue  deleting
+            if(isActive)
+            {
+                var queue = GetQueueForBook(r.BookId);
+
+                var next = queue.FirstOrDefault(x => x.Id != r.Id); // exclude the one being deleted
+                if (next != null)
+                {
+                    next.IsActive = true;
+                    Update(next);
+                }
+            }
+
             //renumber queue positions
-            var queue = GetQueueForBook(r.BookId);
+            var queueUpdated = GetQueueForBook(r.BookId);
             int idx = 1;
-            foreach (var res in queue) {
+            foreach (var res in queueUpdated) {
                 res.QueuePosition = idx++;
                 Update(res);
-            }
+            }            
 
         }
 
@@ -54,7 +70,7 @@ namespace LibraryApplication.Service.Implementation
 
         public List<Reservation> GetReservationsByUser(string userId)
         {
-            return _reservationRepository.GetAll(selector: x => x, predicate: x => x.UserId == userId).ToList();
+            return _reservationRepository.GetAll(selector: x => x, predicate: x => x.UserId.Equals(userId), include: x=> x.Include(z=>z.Book)).ToList();
         }
 
         public Reservation ReserveBook(Guid bookId, string userId)
@@ -62,11 +78,11 @@ namespace LibraryApplication.Service.Implementation
             if(string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException("UserId not found");
             var activeLoan = _loanRepository.Get(selector: x => x,
               predicate: x => x.BorrowedBookId.Equals(bookId) && x.DateReturned == null);
-            if (activeLoan != null) throw new InvalidOperationException("Book is available, reserving not required. Borrow book now!");
+            if (activeLoan == null) throw new InvalidOperationException("Book is available, reserving not required. Borrow book now!");
 
             var queue = GetQueueForBook(bookId);
             if (queue.Any(r => string.Equals(r.UserId, userId, StringComparison.OrdinalIgnoreCase)))
-                throw new InvalidOperationException("You already have a reservation for this book.");
+                throw new InvalidOperationException("You already have a reservation for this book. See status at My Reservations.");
 
             var position = queue.Count + 1;
             var reservation = new Reservation
@@ -85,7 +101,40 @@ namespace LibraryApplication.Service.Implementation
 
         public void ActivateReservation(Guid reservationId, string userId)
         {
-            throw new NotImplementedException();
+            var reservation = GetById(reservationId);
+            if (reservation == null)
+                throw new Exception("Reservation not found");
+
+            if (!string.Equals(reservation.UserId, userId, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Reservation does not belong to this user");
+
+            if (reservation.IsActive)
+                throw new InvalidOperationException("Loan from this reservation is already active");
+
+            reservation.IsActive = true;
+            _reservationRepository.Update(reservation);
+
+        }
+
+        public void FulfillReservation(Guid reservationId, string userId)
+        {
+            var reservation = GetById(reservationId);
+            if (reservation == null)
+                throw new Exception("Reservation not found");
+
+            if (!string.Equals(reservation.UserId, userId, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Reservation does not belong to this user");
+
+            if (reservation.QueuePosition != 1) throw new Exception("You are not first in queue for book");
+            
+            var queue = GetQueueForBook(reservation.BookId).ToList();
+
+            foreach (var r in queue)
+            {
+                r.QueuePosition--;
+                Update(r);
+            }
+            Delete(reservation);
         }
 
         public Reservation Insert(Reservation reservation)
@@ -93,9 +142,9 @@ namespace LibraryApplication.Service.Implementation
             return _reservationRepository.Insert(reservation);
         }
 
-        public Reservation? Get(Guid reservationId)
+        public Reservation? GetById(Guid reservationId)
         {
-            return _reservationRepository.Get(selector: x => x, predicate: x => x.Id == reservationId);
+            return _reservationRepository.Get(selector: x => x, predicate: x => x.Id == reservationId, include: x=>x.Include(z=>z.Book).ThenInclude(y => y.Authors));
         }
 
         public Reservation? Delete(Reservation reservation)

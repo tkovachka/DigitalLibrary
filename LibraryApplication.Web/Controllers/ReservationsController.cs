@@ -1,18 +1,7 @@
-﻿
-using LibraryApplication.Domain.Domain;
-using LibraryApplication.Domain.Identity;
-using LibraryApplication.Repository.Data;
-using LibraryApplication.Service.Interface;
+﻿using LibraryApplication.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace LibraryApplication.Web.Controllers
 {
@@ -20,12 +9,13 @@ namespace LibraryApplication.Web.Controllers
     public class ReservationsController : Controller
     {
         private readonly IReservationService _reservationService;
+        private readonly IBookService _bookService;
 
-        public ReservationsController(IReservationService reservationService)
+        public ReservationsController(IReservationService reservationService, IBookService bookService)
         {
             _reservationService=reservationService;
+            _bookService=bookService;
         }
-
 
 
         // GET: Reservations
@@ -35,11 +25,25 @@ namespace LibraryApplication.Web.Controllers
             return View(_reservationService.GetReservationsByUser(userId));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        public IActionResult Details(Guid id)
+        {
+            var model = _reservationService.GetById(id);
+            if (model == null) return NotFound();
+            return View(model);
+        }
+
         public IActionResult Reserve(Guid bookId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var model = _bookService.GetById(bookId);
+            if (model == null) return NotFound();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ReserveConfirm(Guid bookId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
             try
             {
                 _reservationService.ReserveBook(bookId, userId);
@@ -53,9 +57,15 @@ namespace LibraryApplication.Web.Controllers
             }
         }
 
+        public IActionResult Cancel(Guid id)
+        {
+            var model = _reservationService.GetById(id);
+            return View(model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Cancel(Guid id)
+        public IActionResult CancelConfirm(Guid id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             try

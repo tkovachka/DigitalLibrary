@@ -48,13 +48,13 @@ namespace LibraryApplication.Service.Implementation
                         .ToList();
         }
 
-        public Loan LoanBook(Guid bookId, string userId)
+        public Loan LoanBook(Guid bookId, string userId, Reservation fromReservation)
         {
             if(string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException("UserId required", nameof(userId));
 
             var activeLoan = GetActiveLoanForBook(bookId);
             // TODO: show message to user here and stop further action
-            if (activeLoan != null) throw new InvalidOperationException("Book is currently loaned. Make a reservation!");
+            if (activeLoan != null) throw new InvalidOperationException("Book is currently loaned. Make a reservation or wait your turn.");
             var book = _bookService.GetById(bookId);
             if (book == null) throw new Exception("Book not found");
 
@@ -69,6 +69,10 @@ namespace LibraryApplication.Service.Implementation
             _loanRepository.Insert(loan);
             book.IsAvailable = false;
             _bookService.Update(book);
+            if(fromReservation != null)
+            {
+                _reservationService.FulfillReservation(fromReservation.Id, userId);
+            }
             return loan;
         }
 
@@ -87,15 +91,19 @@ namespace LibraryApplication.Service.Implementation
             Update(loan);
             var book = _bookService.GetById(loan.BorrowedBookId);
             if (book == null) throw new Exception("Book not found");
-            book.IsAvailable = true;
-            _bookService.Update(book);
 
             //activate next reservation for the book
             var queue = _reservationService.GetQueueForBook(loan.BorrowedBookId);
-            var next = queue.FirstOrDefault(r => !r.ExpirationDate.HasValue || r.ExpirationDate.Value >= DateOnly.FromDateTime(DateTime.UtcNow));
-            if(next != null)
+            var next = queue.FirstOrDefault(r => !r.IsActive);
+            if (next != null)
             {
-                _reservationService.ActivateReservation(next.Id, userId);
+                _reservationService.ActivateReservation(next.Id, next.UserId);
+            }
+            else 
+            {
+               //book is only available after there are no more reservations in the queue
+                book.IsAvailable = true;            
+                _bookService.Update(book);
             }
         }
     }

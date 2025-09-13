@@ -1,0 +1,55 @@
+﻿@model Book
+
+@{
+    ViewData["Title"] = "Reserve";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Reserve</h1>
+
+<h2>Reservation Rules:</h2>
+<div>
+    <h3>Reserving a book means getting on the queue for the next loan of the book.</h3>
+    <h2>Once it is your turn, you will get have 3 days to activate your loan, otherwise your reservation will expire and you will have to get on the queue again.</h2>
+    <h2>You can cancel your reservation at any time.</h2>
+    <h3>After you activate your Loan / your Reservation expires, the Reservation will be deleted and no further records will be kept. We only keep current, active reservations.</h3>
+    <h4>Reservation For Book</h4>
+    <hr />
+    <dl class="row">
+        <dt>Book Cover</dt>
+        <dd>
+            <img src="@Model.ThumbnailUrl"/>
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt>Author(s)</dt>
+        <dd>
+            <ul class="list-unstyled mb-2">
+                @foreach (var author in @Model.Authors)
+                {
+                    <li>@author.Name</li>
+                }
+            </ul>
+        </dd>
+        <dt>Categories</dt>
+        <dd>
+            <ul class="list-inline mb-0">
+                @foreach (var cat in @Model.Categories)
+                {
+                    <li class="list-inline-item badge bg-secondary">@cat.Name</li>
+                }
+            </ul>
+        </dd>
+    </dl>
+    
+    <form asp-action="ReserveConfirm" method="post">
+        <input type="hidden" name="bookId" value="@Model.Id" />
+        <input type="submit" value="Reserve" class="btn btn-success" />
+        <p>By making a reservation you agree to the reservation rules</p>
+        <a asp-action="Index">Cancel and go back to All Books</a>
+    </form>
+</div>
