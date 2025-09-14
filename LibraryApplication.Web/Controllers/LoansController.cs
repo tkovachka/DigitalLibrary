@@ -34,28 +34,30 @@ namespace LibraryApplication.Web.Controllers
         public IActionResult Loan(Guid bookId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return NotFound("Log in to make a loan");
             var model = _bookService.GetById(bookId);
-            if (model == null) return NotFound();
-            ViewData["FromReservation"] = _reservationService.GetReservationsByUser(userId).Any(x => x.BookId.Equals(bookId));
+            if (model == null) return NotFound("Book not found");
+            var reservation = _reservationService.GetReservationsByUser(userId).FirstOrDefault(x => x.BookId.Equals(bookId));
+            ViewData["ReservationId"] = reservation?.Id;
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult LoanConfirm(Guid bookId, Reservation fromReservation)
+        public IActionResult LoanConfirm(Guid bookId, Guid? reservationId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (fromReservation == null) return NotFound("Reservation not found");
+            if(userId == null) return NotFound("Log in to confirm your loan");
             try
             {
-                _loanService.LoanBook(bookId, userId, fromReservation);
+                _loanService.LoanBook(bookId, userId, reservationId);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 //todo show error to user on screen
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Details", "Books", new { id = bookId });
+                return NotFound(ex.Message);
             }
         }
 
@@ -63,14 +65,14 @@ namespace LibraryApplication.Web.Controllers
         {
             var model = _loanService.GetById(id);
             if (model == null)
-                throw new Exception("Loan not found");
+                return NotFound("Loan not found");
             return View(model);
         }
 
         public IActionResult Return(Guid id) {
             var model = _loanService.GetById(id);
             if (model == null)
-                throw new Exception("Loan not found");
+                return NotFound("Loan not found");
             return View(model);
         }
 
@@ -88,7 +90,7 @@ namespace LibraryApplication.Web.Controllers
             {
                 //todo show user error message
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Index");
+                return NotFound(ex.Message);
             }
         }
     }

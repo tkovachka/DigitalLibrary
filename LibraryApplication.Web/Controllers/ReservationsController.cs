@@ -28,7 +28,7 @@ namespace LibraryApplication.Web.Controllers
         public IActionResult Details(Guid id)
         {
             var model = _reservationService.GetById(id);
-            if (model == null) return NotFound();
+            if (model == null) return NotFound("Reservation not found");
             return View(model);
         }
 
@@ -43,7 +43,7 @@ namespace LibraryApplication.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ReserveConfirm(Guid bookId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             try
             {
                 _reservationService.ReserveBook(bookId, userId);
@@ -53,7 +53,7 @@ namespace LibraryApplication.Web.Controllers
             {
                 //todo show error to user
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Details", "Book", new { id = bookId });
+                return NotFound(ex.Message);
             }
         }
 
@@ -77,7 +77,7 @@ namespace LibraryApplication.Web.Controllers
             {
                 //todo show error to user
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Index");
+                return NotFound(ex.Message);
             }
         }
 

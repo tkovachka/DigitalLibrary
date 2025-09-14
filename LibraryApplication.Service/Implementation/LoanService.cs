@@ -48,15 +48,14 @@ namespace LibraryApplication.Service.Implementation
                         .ToList();
         }
 
-        public Loan LoanBook(Guid bookId, string userId, Reservation fromReservation)
+        public Loan LoanBook(Guid bookId, string userId, Guid? reservationId)
         {
             if(string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException("UserId required", nameof(userId));
 
             var activeLoan = GetActiveLoanForBook(bookId);
-            // TODO: show message to user here and stop further action
             if (activeLoan != null) throw new InvalidOperationException("Book is currently loaned. Make a reservation or wait your turn.");
-            var book = _bookService.GetById(bookId);
-            if (book == null) throw new Exception("Book not found");
+            
+            var book = _bookService.GetById(bookId) ?? throw new Exception("Book not found");
 
             var loan = new Loan
             {
@@ -66,12 +65,15 @@ namespace LibraryApplication.Service.Implementation
                 DateBorrowed = DateOnly.FromDateTime(DateTime.UtcNow),
                 DateReturned = null
             };
+
             _loanRepository.Insert(loan);
+
             book.IsAvailable = false;
             _bookService.Update(book);
-            if(fromReservation != null)
+
+            if (reservationId.HasValue && reservationId.Value != Guid.Empty)
             {
-                _reservationService.FulfillReservation(fromReservation.Id, userId);
+                _reservationService.FulfillReservation(reservationId.Value, userId);
             }
             return loan;
         }
@@ -89,6 +91,8 @@ namespace LibraryApplication.Service.Implementation
             
             loan.DateReturned = DateOnly.FromDateTime(DateTime.UtcNow);
             Update(loan);
+            Console.WriteLine("Loan DateReturned: " + loan.DateReturned);
+
             var book = _bookService.GetById(loan.BorrowedBookId);
             if (book == null) throw new Exception("Book not found");
 

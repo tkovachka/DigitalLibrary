@@ -11,7 +11,7 @@ namespace LibraryApplication.Service.Interface
     public interface IReservationService
     {
         Reservation? GetById(Guid reservationId);
-        Reservation? Delete(Reservation reservation);
+        Reservation? DeleteById(Guid reservationId);
         Reservation? Update(Reservation reservation);
         Reservation Insert(Reservation reservation);
         Reservation ReserveBook(Guid bookId, string userId); 

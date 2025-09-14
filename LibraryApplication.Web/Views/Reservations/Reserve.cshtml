@@ -10,15 +10,18 @@
 <h2>Reservation Rules:</h2>
 <div>
     <h3>Reserving a book means getting on the queue for the next loan of the book.</h3>
-    <h2>Once it is your turn, you will get have 3 days to activate your loan, otherwise your reservation will expire and you will have to get on the queue again.</h2>
-    <h2>You can cancel your reservation at any time.</h2>
-    <h3>After you activate your Loan / your Reservation expires, the Reservation will be deleted and no further records will be kept. We only keep current, active reservations.</h3>
+    <ul>
+        <li>Once it is your turn, you will get have 3 days to activate your loan, otherwise your reservation will expire and you will have to get on the queue again.</li>
+        <li>You can cancel your reservation at any time, even when it is your turn but you change your mind.</li>
+        <li>After you activate your Loan or your Reservation expires (whichever comes first), the Reservation will be deleted and no further records will be kept. We only keep current, active reservations.</li>
+    </ul>
+
     <h4>Reservation For Book</h4>
     <hr />
     <dl class="row">
-        <dt>Book Cover</dt>
-        <dd>
-            <img src="@Model.ThumbnailUrl"/>
+        <dt class="col-sm-2">Book Cover</dt>
+        <dd class="col-sm-10">
+            <img style="height:350px;" src="@Model.ThumbnailUrl"/>
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Title)
@@ -26,8 +29,8 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Title)
         </dd>
-        <dt>Author(s)</dt>
-        <dd>
+        <dt class="col-sm-2">Author(s)</dt>
+        <dd class="col-sm-10">
             <ul class="list-unstyled mb-2">
                 @foreach (var author in @Model.Authors)
                 {
@@ -35,8 +38,8 @@
                 }
             </ul>
         </dd>
-        <dt>Categories</dt>
-        <dd>
+        <dt class="col-sm-2">Categories</dt>
+        <dd class="col-sm-10">
             <ul class="list-inline mb-0">
                 @foreach (var cat in @Model.Categories)
                 {
@@ -48,7 +51,7 @@
     
     <form asp-action="ReserveConfirm" method="post">
         <input type="hidden" name="bookId" value="@Model.Id" />
-        <input type="submit" value="Reserve" class="btn btn-success" />
+        <input type="submit" value="Reserve" class="btn btn-success btn-lg" />
         <p>By making a reservation you agree to the reservation rules</p>
         <a asp-action="Index">Cancel and go back to All Books</a>
     </form>

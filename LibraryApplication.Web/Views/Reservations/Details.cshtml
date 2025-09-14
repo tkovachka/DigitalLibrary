@@ -15,7 +15,7 @@
             <h3>It is now your turn to Loan the book!</h3>
             <a class="btn btn-success" asp-action="Loan" asp-controller="Loans" asp-route-bookId="@Model.BookId">Loan now!</a>
         }
-        <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn btn-danger">Cancel Reservation</a>
+        <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn btn-danger">Cancel Reservation</a> | 
         <a asp-action="Index">Back to List</a>
     </div>
     <hr />

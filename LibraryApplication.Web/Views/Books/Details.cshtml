@@ -21,32 +21,24 @@
                 <button type="submit" class="btn btn-warning">Return Book</button>
             </form>
         }
-        else if (Model.IsAvailable)
+        else if (Model.IsAvailable || ViewBag.ActiveReservation)
         {
-            <!-- Book available → Loan button -->
+            <!-- Book available -->
             <form asp-controller="Loans" asp-action="Loan" method="post" style="display:inline;">
                 <input type="hidden" name="bookId" value="@Model.Id" />
+                @if (ViewBag.ActiveReservation){
+                    <p>It is your turn to loan the book!</p>
+                }
                 <button type="submit" class="btn btn-success">Loan Book</button>
             </form>
         }
         else if (ViewBag.UsersReservation)
         {
-            if (ViewBag.ActiveReservation)
-            {
-                <!-- Reservation is active for user -->
-                <form asp-controller="Reservations" asp-action="Details" method="get" style="display:inline;">
-                    <input type="hidden" name="id" value="@ViewBag.ReservationId" />
-                    <button type="submit" class="btn btn-success">Activate Loan Now!</button>
-                </form>
-            }
-            else
-            {
-                <!-- Reservation exists but not active → Cancel button -->
-                <form asp-controller="Reservations" asp-action="Cancel" method="post" style="display:inline;">
-                    <input type="hidden" name="id" value="@ViewBag.ReservationId" />
-                    <button type="submit" class="btn btn-danger">Cancel Reservation</button>
-                </form>
-            }
+            <!-- User has a reservation -->
+            <form asp-controller="Reservations" asp-action="Cancel" method="post" style="display:inline;">
+                <input type="hidden" name="id" value="@ViewBag.ReservationId" />
+                <button type="submit" class="btn btn-warning">Cancel Reservation</button>
+            </form>
         }
         else
         {

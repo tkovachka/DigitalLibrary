@@ -2,15 +2,7 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibraryApplication.Service.Implementation
 {
@@ -33,14 +25,14 @@ namespace LibraryApplication.Service.Implementation
                 throw new InvalidOperationException("Not allowed to cancel this reservation.");
 
             bool isActive = r.IsActive;
-            Delete(r);
+            DeleteById(r.Id);
 
             //if reservation is active, activate the next in queue  deleting
             if(isActive)
             {
                 var queue = GetQueueForBook(r.BookId);
 
-                var next = queue.FirstOrDefault(x => x.Id != r.Id); // exclude the one being deleted
+                var next = queue.FirstOrDefault(x => x.Id != r.Id); 
                 if (next != null)
                 {
                     next.IsActive = true;
@@ -125,16 +117,17 @@ namespace LibraryApplication.Service.Implementation
             if (!string.Equals(reservation.UserId, userId, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Reservation does not belong to this user");
 
-            if (reservation.QueuePosition != 1) throw new Exception("You are not first in queue for book");
+            var bookId = reservation.BookId;
+
+            DeleteById(reservation.Id);
             
-            var queue = GetQueueForBook(reservation.BookId).ToList();
+            var queue = GetQueueForBook(bookId);
 
             foreach (var r in queue)
             {
                 r.QueuePosition--;
                 Update(r);
             }
-            Delete(reservation);
         }
 
         public Reservation Insert(Reservation reservation)
@@ -147,9 +140,10 @@ namespace LibraryApplication.Service.Implementation
             return _reservationRepository.Get(selector: x => x, predicate: x => x.Id == reservationId, include: x=>x.Include(z=>z.Book).ThenInclude(y => y.Authors));
         }
 
-        public Reservation? Delete(Reservation reservation)
+        public Reservation? DeleteById(Guid reservationId)
         {
-            return _reservationRepository.Delete(reservation);
+            var r = GetById(reservationId);
+            return _reservationRepository.Delete(r);
         }
 
         public Reservation? Update(Reservation reservation)

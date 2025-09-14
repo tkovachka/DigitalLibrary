@@ -7,41 +7,51 @@
 
 <h1>My Reservations</h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th></th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.QueuePosition)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateRequested)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                <img src="@item.Book.ThumbnailUrl" style="height:200px;"/>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Book.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.QueuePosition)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateRequested)
-            </td>
-            <td>
-                <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
-            </td>
-        </tr>
+@if (!Model.Any())
+{
+    <p>You have no current reservations. 
+       <a asp-controller="Books" asp-action="Index">Go to all books</a>
+    </p>
+    <p>We don't keep your past reservations.</p>
 }
-    </tbody>
-</table>
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Book.Title)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.QueuePosition)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DateRequested)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
+                <td>
+                    <img src="@item.Book.ThumbnailUrl" style="height:200px;"/>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Book.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.QueuePosition)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateRequested)
+                </td>
+                <td>
+                    <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
+}

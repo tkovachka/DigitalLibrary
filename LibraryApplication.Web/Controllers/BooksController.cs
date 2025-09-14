@@ -49,18 +49,21 @@ namespace LibraryApplication.Web.Controllers
             if (!string.IsNullOrEmpty(userId))
             {
                 var loan = _loanService.GetActiveLoanForBook(book.Id);
+
                 if (loan != null)
                 {
                     if (string.Equals(loan.UserId, userId, StringComparison.OrdinalIgnoreCase))
                     {
+                        // User currently has the loan
                         ViewData["LoanId"] = loan.Id;
                         ViewData["UsersLoan"] = true;
                     }
                     else
                     {
+                        // Someone else has the loan, check if this user has a reservation
                         var reservation = _reservationService
                             .GetReservationsByUser(userId)
-                            .FirstOrDefault(x => x.BookId.Equals(book.Id));
+                            .FirstOrDefault(x => x.BookId == book.Id);
 
                         if (reservation != null)
                         {
@@ -71,7 +74,23 @@ namespace LibraryApplication.Web.Controllers
                         }
                     }
                 }
+                else
+                {
+                    // No loan exists, book is available, but user might still have an active reservation
+                    var reservation = _reservationService
+                        .GetReservationsByUser(userId)
+                        .FirstOrDefault(x => x.BookId == book.Id);
+
+                    if (reservation != null)
+                    {
+                        ViewData["UsersReservation"] = true;
+                        ViewData["ReservationId"] = reservation.Id;
+                        if (reservation.IsActive)
+                            ViewData["ActiveReservation"] = true;
+                    }
+                }
             }
+
             return View(book);
         }
 

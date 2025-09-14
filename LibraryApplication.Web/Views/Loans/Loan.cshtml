@@ -84,7 +84,7 @@
     
     <form asp-action="LoanConfirm" method="post">
         <input type="hidden" name="bookId" value="@Model.Id" />
-        <input type="hidden" name="fromReservation" value="@ViewBag.FromReservation" />
+        <input type="hidden" name="reservationId" value="@ViewBag.ReservationId" />
         <input type="submit" value="Confirm Loan" class="btn btn-success" /> 
         <a asp-action="Index" asp-controller="Books">Cancel and go back to Books</a>
     </form>
