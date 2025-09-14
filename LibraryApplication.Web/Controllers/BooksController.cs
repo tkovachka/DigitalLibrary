@@ -1,4 +1,5 @@
-﻿using LibraryApplication.Service.Interface;
+﻿using LibraryApplication.Service.API;
+using LibraryApplication.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
@@ -15,7 +16,10 @@ namespace LibraryApplication.Web.Controllers
         private readonly ILoanService _loanService;
         private readonly IReservationService _reservationService;
 
-        public BooksController(IBookService bookService, IAuthorService authorService, IPublisherService publisherService, ICategoryService categoryService, ILoanService loanService, IReservationService reservationService)
+        private readonly GoogleBooksClient _googleBooksClient;
+        private readonly GoogleBookImporter _googleBookImporter;
+
+        public BooksController(IBookService bookService, IAuthorService authorService, IPublisherService publisherService, ICategoryService categoryService, ILoanService loanService, IReservationService reservationService, GoogleBooksClient googleBooksClient, GoogleBookImporter googleBookImporter)
         {
             _bookService=bookService;
             _authorService=authorService;
@@ -23,6 +27,8 @@ namespace LibraryApplication.Web.Controllers
             _categoryService=categoryService;
             _loanService=loanService;
             _reservationService=reservationService;
+            _googleBooksClient=googleBooksClient;
+            _googleBookImporter=googleBookImporter;
         }
 
         // GET: Books
@@ -175,5 +181,26 @@ namespace LibraryApplication.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ImportFromGoogle(string query, int count = 10, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return BadRequest("query required");
+            if (count < 1) return BadRequest("count must be > 0");
+            // Limit total count, to avoid runaway imports; each loop call will use max 40 per request
+            if (count > 40) count = 40;
+
+            try
+            {
+                var books = await _googleBooksClient.SearchAndParseAsync(query, count, ct);
+                var (inserted, skipped) = await _googleBookImporter.ImportAsync(books, ct);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            //return Ok(new { requested = count, found = books.Count, inserted, skipped });
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

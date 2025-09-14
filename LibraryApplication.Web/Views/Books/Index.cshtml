@@ -7,76 +7,83 @@
 
 <h1>Index</h1>
 
-<div class="container">
+<div class="container my-4">
     <p>
-        <a asp-action="Create">Create New</a>
+        <a asp-action="Create" class="btn btn-success mb-3">Create New</a>
     </p>
+
+    <form asp-action="ImportFromGoogle" method="post" class="p-4 border rounded bg-light shadow-sm mb-4" style="max-width: 500px; margin:auto;">
+        <div class="mb-3">
+            <label for="query" class="form-label">Search Query or ISBN</label>
+            <input type="text" id="query" name="query" class="form-control" placeholder="Enter search query or ISBN" required />
+        </div>
+
+        <div class="mb-3">
+            <label for="count" class="form-label">Number of Results</label>
+            <input type="number" id="count" name="count" class="form-control" min="1" max="40" value="10" />
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100">Import from Google Books</button>
+    </form>
 
     @for (int i = 0; i < Model.Count; i++)
     {
         var item = Model[i];
 
-        @if(i%3 == 0)
+        if (i % 4 == 0)
         {
-            @:<div class="row">
+            @:<div class="row mb-4">
         }
 
-            <div class="col-12 col-md-4">
-                <div class="card h-100">
-                    @if (!string.IsNullOrWhiteSpace(item.ThumbnailUrl))
+        <div class="col-12 col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                @if (!string.IsNullOrWhiteSpace(item.ThumbnailUrl))
+                {
+                    <img src="@item.ThumbnailUrl" class="card-img-top" alt="@item.Title" />
+                }
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@item.Title</h5>
+                    @if (!string.IsNullOrWhiteSpace(item.Subtitle))
                     {
-                        <img src="@item.ThumbnailUrl"
-                                class="card-img-top"
-                                alt="@item.Title" />
+                        <h6 class="card-subtitle mb-2 text-muted">@item.Subtitle</h6>
                     }
 
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Title</h5>
-                        @if (!string.IsNullOrWhiteSpace(item.Subtitle))
+                    <p class="card-text mb-2">
+                        <strong>ISBN-10:</strong> @item.Isbn10<br />
+                        <strong>Page count:</strong> @item.PageCount<br />
+                        <strong>Average rating:</strong> @item.AverageRating<br />
+                        <strong>Publisher:</strong> @item.Publisher?.Name
+                    </p>
+
+                    <p class="fw-semibold mb-1"><strong>Authors</strong></p>
+                    <ul class="list-unstyled mb-2">
+                        @foreach (var author in item.Authors)
                         {
-                            <h6 class="card-subtitle mb-2 text-muted">@item.Subtitle</h6>
+                            <li>@author.Name</li>
                         }
+                    </ul>
 
-                        <p class="card-text mb-2">
-                            <strong>ISBN-10:</strong> @item.Isbn10<br />
-                            <strong>ISBN-13:</strong> @item.Isbn13<br />
-                            <strong>Published:</strong> @item.PublishedDate:yyyy-MM-dd<br />
-                            <strong>Page count:</strong> @item.PageCount<br />
-                            <strong>Language:</strong> @item.Language<br />
-                            <strong>Average rating:</strong> @item.AverageRating<br />
-                            <strong>Ratings count:</strong> @item.RatingsCount<br />
-                            <strong>Description:</strong> @item.Description<br />
-                            <strong>Publisher:</strong> @item.Publisher?.Name
-                        </p>
+                    <p class="fw-semibold mb-1"><strong>Categories</strong></p>
+                    <ul class="list-inline mb-0">
+                        @foreach (var cat in item.Categories)
+                        {
+                            <li class="list-inline-item badge bg-dark text-white">@cat.Name</li>
+                        }
+                    </ul>
+                </div>
 
-                        <p class="fw-semibold mb-1"><strong>Authors</strong></p>
-                        <ul class="list-unstyled mb-2">
-                            @foreach (var author in item.Authors)
-                            {
-                                <li>@author.Name</li>
-                            }
-                        </ul>
-
-                        <p class="fw-semibold mb-1"><strong>Categories</strong></p>
-                        <ul class="list-inline mb-0">
-                            @foreach (var cat in item.Categories)
-                            {
-                                <li class="list-inline-item badge bg-secondary">@cat.Name</li>
-                            }
-                        </ul>
-                    </div>
-
-                    <div class="card-footer bg-white border-0">
-                        <a class="btn btn-primary" asp-action="Edit"    asp-route-id="@item.Id">Edit</a> 
-                        <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a> 
-                        <a class="btn btn-danger" asp-action="Delete"  asp-route-id="@item.Id">Delete</a>
-                    </div>
+                <div class="card-footer bg-white border-0">
+                    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </div>
             </div>
-       
-        @if(i%3 == 2) 
+        </div>
+
+        if (i % 4 == 3 || i == Model.Count - 1)
         {
-            @:</div>    
+            @:</div> <!-- close row -->
         }
-}
+    }
 </div>

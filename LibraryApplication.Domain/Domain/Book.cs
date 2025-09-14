@@ -4,22 +4,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 public class Book : BaseEntity
 {
-    [Required, MaxLength(32)]
-    public string Isbn10 { get; set; } = string.Empty;
-    [MaxLength(32)]
+    public string? Isbn10 { get; set; } = string.Empty;
     public string? Isbn13 { get; set; }
-    [Required, MaxLength(256)]
+    [Required]
     public string Title { get; set; } = string.Empty;
-    [MaxLength(256)]
     public string? Subtitle { get; set; }
     public DateOnly? PublishedDate { get; set; }
     public int? PageCount { get; set; }
-    [Required, MaxLength(16)]
+    [Required]
     public string? Language { get; set; }    // ISO 639‑1 code (e.g., "en")
     [Range(0, 5)]
     public double? AverageRating { get; set; }
     public int? RatingsCount { get; set; }
-    [MaxLength(2048)]
     public string? Description { get; set; }
     [Url]
     public string? ThumbnailUrl { get; set; }

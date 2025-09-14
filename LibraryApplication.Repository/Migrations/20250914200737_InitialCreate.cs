@@ -200,7 +200,7 @@ namespace LibraryApplication.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Isbn10 = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    Isbn10 = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: true),
                     Isbn13 = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: true),
                     Title = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Subtitle = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -211,6 +211,7 @@ namespace LibraryApplication.Repository.Migrations
                     RatingsCount = table.Column<int>(type: "int", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: true),
                     ThumbnailUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
                     PublisherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>

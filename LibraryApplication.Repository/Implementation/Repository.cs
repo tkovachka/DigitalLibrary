@@ -1,8 +1,9 @@
 ﻿using LibraryApplication.Domain.Domain;
 using LibraryApplication.Repository.Data;
 using LibraryApplication.Repository.Interface;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Linq.Expressions;
 
 namespace LibraryApplication.Repository.Implementation
@@ -16,6 +17,11 @@ namespace LibraryApplication.Repository.Implementation
         {
             _context = context;
             this.entites = _context.Set<T>();
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
         }
 
         public T Insert(T entity)
@@ -61,6 +67,18 @@ namespace LibraryApplication.Repository.Implementation
             }
 
             return query.Select(selector).FirstOrDefault();
+        }
+
+        public IEnumerable<T> InsertAll(IEnumerable<T> entities, bool saveChanges=true)
+        {
+            if (entities == null || !entities.Any())
+                return Enumerable.Empty<T>();
+
+            _context.AddRange(entities);
+            if (saveChanges)
+                _context.SaveChanges();
+
+            return entities;
         }
 
         public IEnumerable<E> GetAll<E>(Expression<Func<T, E>> selector,

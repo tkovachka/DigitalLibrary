@@ -46,6 +46,11 @@ namespace LibraryApplication.Service.Implementation
             return _repository.Get(selector: x=>x, predicate:x=>x.Id.Equals(id));
         }
 
+        public void InsertAll(List<Publisher> publishers, bool saveChanges = true)
+        {
+            _repository.InsertAll(publishers, saveChanges);
+        }
+
         public Publisher Update(Publisher publisher)
         {
             return _repository.Update(publisher);

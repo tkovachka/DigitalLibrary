@@ -2,6 +2,7 @@ using LibraryApplication.Domain.Identity;
 using LibraryApplication.Repository.Data;
 using LibraryApplication.Repository.Implementation;
 using LibraryApplication.Repository.Interface;
+using LibraryApplication.Service.API;
 using LibraryApplication.Service.Implementation;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,8 @@ internal class Program
         builder.Services.AddTransient<IBookService, BookService>();
         builder.Services.AddTransient<ILoanService, LoanService>();
         builder.Services.AddTransient<IReservationService, ReservationService>();
+        builder.Services.AddHttpClient<GoogleBooksClient>();
+        builder.Services.AddTransient<GoogleBookImporter>();
 
         var app = builder.Build();
 

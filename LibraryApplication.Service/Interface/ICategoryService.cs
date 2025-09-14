@@ -7,6 +7,7 @@ namespace LibraryApplication.Service.Interface
         List<Category> GetAll();
         Category? GetById(Guid Id);
         Category Add(Category category);
+        void InsertAll(List<Category> categories, bool saveChanges=true);
         Category Update(Category category);
         Category DeleteById(Guid Id);
         bool Exists(string name);

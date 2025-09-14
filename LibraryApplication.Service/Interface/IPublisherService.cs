@@ -1,9 +1,4 @@
 ﻿using LibraryApplication.Domain.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibraryApplication.Service.Interface
 {
@@ -12,6 +7,7 @@ namespace LibraryApplication.Service.Interface
         Publisher? GetById(Guid id);
         List<Publisher> GetAll();
         Publisher Add(Publisher publisher);
+        void InsertAll(List<Publisher> publishers, bool saveChanges=true);
         Publisher Update(Publisher publisher);
         Publisher DeleteById(Guid id);
         bool Exists(string name);

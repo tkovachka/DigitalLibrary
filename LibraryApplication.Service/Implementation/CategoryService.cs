@@ -46,6 +46,11 @@ namespace LibraryApplication.Service.Implementation
             return _repository.Get(selector: x => x, predicate: x => x.Id.Equals(Id));
         }
 
+        public void InsertAll(List<Category> categories, bool saveChanges = true)
+        {
+            _repository.InsertAll(categories, saveChanges);
+        }
+
         public Category Update(Category category)
         {
             return _repository.Update(category);

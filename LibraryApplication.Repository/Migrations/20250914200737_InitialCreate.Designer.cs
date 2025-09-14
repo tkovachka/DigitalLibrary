@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryApplication.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250913104209_AddIsAvailableToBook")]
-    partial class AddIsAvailableToBook
+    [Migration("20250914200737_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,7 +57,6 @@ namespace LibraryApplication.Repository.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Isbn10")
-                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 

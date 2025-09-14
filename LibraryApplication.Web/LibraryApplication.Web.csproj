@@ -27,8 +27,4 @@
     <ProjectReference Include="..\LibraryApplication.Service\LibraryApplication.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\API\" />
-  </ItemGroup>
-
 </Project>

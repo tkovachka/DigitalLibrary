@@ -2,6 +2,7 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace LibraryApplication.Service.Implementation
 {
@@ -31,6 +32,11 @@ namespace LibraryApplication.Service.Implementation
             book.Authors = _authorService.GetAllByIds(authorIds);
             book.Categories = _categoryService.GetAllByIds(categoryIds);
             return _repository.Insert(book);
+        }
+
+        public Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return _repository.BeginTransactionAsync();
         }
 
         public Book DeleteById(Guid Id)
@@ -72,6 +78,11 @@ namespace LibraryApplication.Service.Implementation
             return _repository.Get(selector:x=>x,
                 predicate:x=>x.Id.Equals(Id), 
                 include: x => x.Include(z => z.Authors).Include(z => z.Publisher).Include(z => z.Categories));
+        }
+
+        public void InsertAll(List<Book> books, bool saveChanges = true)
+        {
+            _repository.InsertAll(books, saveChanges);
         }
 
         public Book Update(Book book)
