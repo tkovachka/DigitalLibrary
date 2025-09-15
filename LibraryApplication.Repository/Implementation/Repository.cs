@@ -69,7 +69,7 @@ namespace LibraryApplication.Repository.Implementation
             return query.Select(selector).FirstOrDefault();
         }
 
-        public IEnumerable<T> InsertAll(IEnumerable<T> entities, bool saveChanges=true)
+        public IEnumerable<T> InsertAll(IEnumerable<T> entities, bool saveChanges = true)
         {
             if (entities == null || !entities.Any())
                 return Enumerable.Empty<T>();
@@ -112,5 +112,15 @@ namespace LibraryApplication.Repository.Implementation
             return query.Select(selector).AsEnumerable();
         }
 
+        public int DeleteAll(bool saveChanges = true)
+        {
+            if (!entites.Any()) return 0;
+
+            _context.RemoveRange(entites);
+            if (saveChanges)
+                return _context.SaveChanges();
+
+            return entites.Count();
+        }
     }
 }

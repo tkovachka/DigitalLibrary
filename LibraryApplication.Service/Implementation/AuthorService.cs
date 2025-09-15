@@ -2,11 +2,6 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibraryApplication.Service.Implementation
 {
@@ -24,6 +19,11 @@ namespace LibraryApplication.Service.Implementation
             return _repository.Insert(author);
         }
 
+        public int DeleteAll(bool saveChanges = true)
+        {
+            return _repository.DeleteAll(saveChanges);
+        }
+
         public Author DeleteById(Guid id)
         {
             var author = GetById(id);
@@ -33,23 +33,23 @@ namespace LibraryApplication.Service.Implementation
 
         public bool Exists(string name)
         {
-            Author? author = _repository.Get(selector: x=>x, predicate:x=>x.Name.Equals(name));
+            Author? author = _repository.Get(selector: x => x, predicate: x => x.Name.Equals(name));
             return author != null;
         }
 
         public List<Author> GetAll()
         {
-            return _repository.GetAll(x => x).ToList();
+            return _repository.GetAll(selector:x => x, include:x=>x.Include(z=>z.Books)).ToList();
         }
 
         public ICollection<Author> GetAllByIds(List<Guid> authorIds)
         {
-            return _repository.GetAll(selector: x => x, predicate: x => authorIds.Contains(x.Id)).ToList();
+            return _repository.GetAll(selector: x => x, predicate: x => authorIds.Contains(x.Id), include: x => x.Include(z => z.Books)).ToList();
         }
 
         public Author? GetById(Guid id)
         {
-            return _repository.Get(selector: x=>x, predicate: x=>x.Id.Equals(id), include: x=>x.Include(z=>z.Books));
+            return _repository.Get(selector: x => x, predicate: x => x.Id.Equals(id), include: x => x.Include(z => z.Books));
         }
 
         public void InsertAll(List<Author> authors, bool saveChanges = true)

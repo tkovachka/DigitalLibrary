@@ -21,5 +21,6 @@ namespace LibraryApplication.Repository.Interface
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
             Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
             bool asNoTracking = false);
+        int DeleteAll(bool saveChanges = true);
     }
 }

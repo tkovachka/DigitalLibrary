@@ -1,5 +1,4 @@
-﻿using LibraryApplication.Domain.Domain;
-using LibraryApplication.Service.Interface;
+﻿using LibraryApplication.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -47,7 +46,7 @@ namespace LibraryApplication.Web.Controllers
         public IActionResult LoanConfirm(Guid bookId, Guid? reservationId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if(userId == null) return NotFound("Log in to confirm your loan");
+            if (userId == null) return NotFound("Log in to confirm your loan");
             try
             {
                 _loanService.LoanBook(bookId, userId, reservationId);
@@ -69,7 +68,8 @@ namespace LibraryApplication.Web.Controllers
             return View(model);
         }
 
-        public IActionResult Return(Guid id) {
+        public IActionResult Return(Guid id)
+        {
             var model = _loanService.GetById(id);
             if (model == null)
                 return NotFound("Loan not found");

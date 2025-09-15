@@ -3,10 +3,22 @@
 @{
     ViewData["Title"] = "Delete";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var deleteAll = ViewData["DeleteAll"] as bool? ?? false;
 }
 
 <h1>Delete</h1>
 
+@if (deleteAll)
+{
+    <h3>Are you sure you want to delete <strong>ALL books</strong> and reset the database?</h3>
+    <h2>Deleting books will delete <strong>ALL loans and reservations</strong> made for the books.</h2>
+    <form asp-action="Delete" method="post">
+        <button type="submit" class="btn btn-danger">Delete All</button> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+} 
+else 
+{
 <h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Book</h4>
@@ -92,3 +104,4 @@
         <a asp-action="Index">Back to List</a>
     </form>
 </div>
+}

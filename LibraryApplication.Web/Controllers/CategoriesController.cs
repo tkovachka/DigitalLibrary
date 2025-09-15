@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using LibraryApplication.Domain.Domain;
-using LibraryApplication.Repository.Data;
+﻿using LibraryApplication.Domain.Domain;
 using LibraryApplication.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryApplication.Web.Controllers
 {
@@ -30,7 +24,7 @@ namespace LibraryApplication.Web.Controllers
         // GET: Categories/Details/5
         public IActionResult Details(Guid id)
         {
-           var category = _categoryService.GetById(id);
+            var category = _categoryService.GetById(id);
             if (category == null)
             {
                 return NotFound();
@@ -40,6 +34,7 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Categories/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
@@ -49,6 +44,7 @@ namespace LibraryApplication.Web.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Name")] Category category)
         {
@@ -62,6 +58,7 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Categories/Edit/5
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(Guid id)
         {
             var category = _categoryService.GetById(id);
@@ -76,6 +73,7 @@ namespace LibraryApplication.Web.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Guid id, [Bind("Name,Id")] Category category)
         {
@@ -88,23 +86,38 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Categories/Delete/5
-        public IActionResult Delete(Guid id)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(Guid? id)
         {
-            var category = _categoryService.GetById(id);
-            if (category == null)
+            if (id == null)
+            {
+                ViewData["DeleteAll"] = true;
+                return View();
+            }
+
+            var book = _categoryService.GetById(id.Value);
+            if (book == null)
             {
                 return NotFound();
             }
 
-            return View(category);
+            return View(book);
         }
 
         // POST: Categories/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(Guid id)
+        public IActionResult DeleteConfirmed(Guid? id)
         {
-            _categoryService.DeleteById(id);
+            if (id == null)
+            {
+                _categoryService.DeleteAll();
+            }
+            else
+            {
+                _categoryService.DeleteById(id.Value);
+            }
             return RedirectToAction(nameof(Index));
         }
     }

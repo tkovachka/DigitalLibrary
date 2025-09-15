@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using LibraryApplication.Domain.Identity;
 using LibraryApplication.Repository.Data;
 using LibraryApplication.Repository.Implementation;
@@ -29,7 +28,7 @@ internal class Program
             options.UseSqlServer(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.AddDefaultIdentity<LibraryApplicationUser>(options => 
+        builder.Services.AddDefaultIdentity<LibraryApplicationUser>(options =>
         {
             options.SignIn.RequireConfirmedAccount = false;
             options.Password.RequireDigit = true;

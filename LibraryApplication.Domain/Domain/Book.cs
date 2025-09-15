@@ -22,10 +22,10 @@ public class Book : BaseEntity
     public bool IsAvailable { get; set; } = true;
     public Guid PublisherId { get; set; }
     public virtual Publisher? Publisher { get; set; }
-    [NotMapped]        
-    public List<Guid> AuthorIds { get; set; } = new();   
     [NotMapped]
-    public List<Guid> CategoryIds { get; set; } = new();   
+    public List<Guid> AuthorIds { get; set; } = new();
+    [NotMapped]
+    public List<Guid> CategoryIds { get; set; } = new();
     public virtual ICollection<Author> Authors { get; set; } = new List<Author>();
     public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
     public virtual ICollection<Loan> Loans { get; set; } = new List<Loan>();

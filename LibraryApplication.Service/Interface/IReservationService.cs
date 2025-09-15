@@ -1,10 +1,4 @@
 ﻿using LibraryApplication.Domain.Domain;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibraryApplication.Service.Interface
 {
@@ -14,7 +8,7 @@ namespace LibraryApplication.Service.Interface
         Reservation? DeleteById(Guid reservationId);
         Reservation? Update(Reservation reservation);
         Reservation Insert(Reservation reservation);
-        Reservation ReserveBook(Guid bookId, string userId); 
+        Reservation ReserveBook(Guid bookId, string userId);
         List<Reservation> GetReservationsByUser(string userId);
         void CancelReservation(Guid reservationId, string userId);
         List<Reservation> GetQueueForBook(Guid bookId);

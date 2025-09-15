@@ -1,6 +1,7 @@
 ﻿using LibraryApplication.Domain.Domain;
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryApplication.Service.Implementation
 {
@@ -18,6 +19,11 @@ namespace LibraryApplication.Service.Implementation
             return _repository.Insert(category);
         }
 
+        public int DeleteAll(bool saveChanges = true)
+        {
+            return _repository.DeleteAll(saveChanges);
+        }
+
         public Category DeleteById(Guid Id)
         {
             Category? category = GetById(Id);
@@ -33,17 +39,17 @@ namespace LibraryApplication.Service.Implementation
 
         public List<Category> GetAll()
         {
-            return _repository.GetAll(x => x).ToList();
+            return _repository.GetAll(selector:x => x, include:x=>x.Include(z=>z.Books)).ToList();
         }
 
         public ICollection<Category> GetAllByIds(List<Guid> categoryIds)
         {
-            return _repository.GetAll(selector: x=>x, predicate: x=>categoryIds.Contains(x.Id)).ToList();
+            return _repository.GetAll(selector: x => x, predicate: x => categoryIds.Contains(x.Id), include:x=>x.Include(z=>z.Books)).ToList();
         }
 
         public Category? GetById(Guid Id)
         {
-            return _repository.Get(selector: x => x, predicate: x => x.Id.Equals(Id));
+            return _repository.Get(selector: x => x, predicate: x => x.Id.Equals(Id), include: x=>x.Include(z=>z.Books));
         }
 
         public void InsertAll(List<Category> categories, bool saveChanges = true)

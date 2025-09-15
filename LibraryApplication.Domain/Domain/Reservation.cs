@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace LibraryApplication.Domain.Domain
+﻿namespace LibraryApplication.Domain.Domain
 {
     public class Reservation : BaseEntity
     {

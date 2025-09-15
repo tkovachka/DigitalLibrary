@@ -1,9 +1,4 @@
 ﻿using LibraryApplication.Domain.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibraryApplication.Service.Interface
 {
@@ -11,11 +6,13 @@ namespace LibraryApplication.Service.Interface
     {
         Author? GetById(Guid id);
         List<Author> GetAll();
-        Author Add(Author author); 
+        Author Add(Author author);
         void InsertAll(List<Author> authors, bool saveChanges = true);
         Author Update(Author author);
         Author DeleteById(Guid id);
         bool Exists(string name);
         ICollection<Author> GetAllByIds(List<Guid> authorIds);
+        int DeleteAll(bool saveChanges = true);
+
     }
 }

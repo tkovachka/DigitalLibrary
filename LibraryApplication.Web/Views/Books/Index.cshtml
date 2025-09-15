@@ -1,21 +1,23 @@
 ﻿@model List<Book>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Books";
     Layout = "~/Views/Shared/_Layout.cshtml";
     @using Microsoft.AspNetCore.Identity
     @inject UserManager<LibraryApplication.Domain.Identity.LibraryApplicationUser> UserManager
 }
 
-<h1>Index</h1>
+<h1>Browse All Books</h1>
 
 <div class="container">
-    @if (User.IsInRole("Admin"))
+   @if (User.IsInRole("Admin"))
     {
-        <div class="btn-group">
+        <div class="btn-group mb-2">
             <a asp-action="Create" class="btn btn-success">Create New</a>
             <a asp-action="Import" class="btn btn-outline-success">Import</a>
         </div>
+        <br />
+        <a asp-action="Delete" class="btn btn-danger">Delete All Books</a>
         <hr />
     }
     

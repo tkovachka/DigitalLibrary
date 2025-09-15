@@ -2,23 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
 using LibraryApplication.Domain.Identity;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace LibraryApplication.Web.Areas.Identity.Pages.Account
 {
@@ -127,11 +120,11 @@ namespace LibraryApplication.Web.Areas.Identity.Pages.Account
                 user.Name = Input.Name;
                 user.Surname = Input.Surname;
                 user.CreationDate = DateOnly.FromDateTime(DateTime.Now);
-                
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
-                {                    
+                {
                     if (!await _userManager.IsInRoleAsync(user, "User"))
                     {
                         await _userManager.AddToRoleAsync(user, "User");

@@ -28,11 +28,11 @@ namespace LibraryApplication.Service.Implementation
             DeleteById(r.Id);
 
             //if reservation is active, activate the next in queue  deleting
-            if(isActive)
+            if (isActive)
             {
                 var queue = GetQueueForBook(r.BookId);
 
-                var next = queue.FirstOrDefault(x => x.Id != r.Id); 
+                var next = queue.FirstOrDefault(x => x.Id != r.Id);
                 if (next != null)
                 {
                     next.IsActive = true;
@@ -43,10 +43,11 @@ namespace LibraryApplication.Service.Implementation
             //renumber queue positions
             var queueUpdated = GetQueueForBook(r.BookId);
             int idx = 1;
-            foreach (var res in queueUpdated) {
+            foreach (var res in queueUpdated)
+            {
                 res.QueuePosition = idx++;
                 Update(res);
-            }            
+            }
 
         }
 
@@ -62,12 +63,12 @@ namespace LibraryApplication.Service.Implementation
 
         public List<Reservation> GetReservationsByUser(string userId)
         {
-            return _reservationRepository.GetAll(selector: x => x, predicate: x => x.UserId.Equals(userId), include: x=> x.Include(z=>z.Book)).ToList();
+            return _reservationRepository.GetAll(selector: x => x, predicate: x => x.UserId.Equals(userId), include: x => x.Include(z => z.Book)).ToList();
         }
 
         public Reservation ReserveBook(Guid bookId, string userId)
         {
-            if(string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException("UserId not found");
+            if (string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException("UserId not found");
             var activeLoan = _loanRepository.Get(selector: x => x,
               predicate: x => x.BorrowedBookId.Equals(bookId) && x.DateReturned == null);
             if (activeLoan == null) throw new InvalidOperationException("Book is available, reserving not required. Borrow book now!");
@@ -120,7 +121,7 @@ namespace LibraryApplication.Service.Implementation
             var bookId = reservation.BookId;
 
             DeleteById(reservation.Id);
-            
+
             var queue = GetQueueForBook(bookId);
 
             foreach (var r in queue)
@@ -137,7 +138,7 @@ namespace LibraryApplication.Service.Implementation
 
         public Reservation? GetById(Guid reservationId)
         {
-            return _reservationRepository.Get(selector: x => x, predicate: x => x.Id == reservationId, include: x=>x.Include(z=>z.Book).ThenInclude(y => y.Authors));
+            return _reservationRepository.Get(selector: x => x, predicate: x => x.Id == reservationId, include: x => x.Include(z => z.Book).ThenInclude(y => y.Authors));
         }
 
         public Reservation? DeleteById(Guid reservationId)

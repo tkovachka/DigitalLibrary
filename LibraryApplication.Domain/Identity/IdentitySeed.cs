@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using LibraryApplication.Domain.Identity;
+﻿using LibraryApplication.Domain.Identity;
+using Microsoft.AspNetCore.Identity;
 
 public static class IdentitySeed
 {

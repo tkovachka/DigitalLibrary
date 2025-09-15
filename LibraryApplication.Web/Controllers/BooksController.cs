@@ -3,7 +3,6 @@ using LibraryApplication.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
 namespace LibraryApplication.Web.Controllers
@@ -169,9 +168,15 @@ namespace LibraryApplication.Web.Controllers
 
         // GET: Books/Delete/5
         [Authorize(Roles = "Admin")]
-        public IActionResult Delete(Guid id)
+        public IActionResult Delete(Guid? id)
         {
-            var book =_bookService.GetById(id);
+            if(id == null)
+            {
+                ViewData["DeleteAll"] = true;
+                return View();
+            }
+
+            var book = _bookService.GetById(id.Value);
             if (book == null)
             {
                 return NotFound();
@@ -181,12 +186,19 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // POST: Books/Delete/5
-        [HttpPost, ActionName("Delete")]        
+        [HttpPost, ActionName("Delete")]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(Guid id)
+        public IActionResult DeleteConfirmed(Guid? id)
         {
-            _bookService.DeleteById(id);
+            if (id == null)
+            {
+                _bookService.DeleteAll();
+            }
+            else
+            {
+                _bookService.DeleteById(id.Value);
+            }
             return RedirectToAction(nameof(Index));
         }
 

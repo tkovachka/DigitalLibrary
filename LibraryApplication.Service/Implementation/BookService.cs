@@ -1,5 +1,4 @@
-﻿using LibraryApplication.Domain.Domain;
-using LibraryApplication.Repository.Interface;
+﻿using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -39,6 +38,11 @@ namespace LibraryApplication.Service.Implementation
             return _repository.BeginTransactionAsync();
         }
 
+        public int DeleteAll(bool saveChanges = true)
+        {
+            return _repository.DeleteAll(saveChanges);
+        }
+
         public Book DeleteById(Guid Id)
         {
             Book? book = GetById(Id);
@@ -48,8 +52,8 @@ namespace LibraryApplication.Service.Implementation
 
         public List<Book> GetAll()
         {
-            return _repository.GetAll(selector:x => x,
-                include: x=>x.Include(z=>z.Authors).Include(z=>z.Publisher).Include(z=>z.Categories)).ToList();
+            return _repository.GetAll(selector: x => x,
+                include: x => x.Include(z => z.Authors).Include(z => z.Publisher).Include(z => z.Categories)).ToList();
         }
 
         public List<Book> GetAllBooksByAuthorId(Guid authorId)
@@ -75,8 +79,8 @@ namespace LibraryApplication.Service.Implementation
 
         public Book? GetById(Guid Id)
         {
-            return _repository.Get(selector:x=>x,
-                predicate:x=>x.Id.Equals(Id), 
+            return _repository.Get(selector: x => x,
+                predicate: x => x.Id.Equals(Id),
                 include: x => x.Include(z => z.Authors).Include(z => z.Publisher).Include(z => z.Categories));
         }
 

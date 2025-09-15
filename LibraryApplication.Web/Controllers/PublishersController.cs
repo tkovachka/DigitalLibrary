@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using LibraryApplication.Domain.Domain;
-using LibraryApplication.Repository.Data;
+﻿using LibraryApplication.Domain.Domain;
 using LibraryApplication.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryApplication.Web.Controllers
 {
@@ -40,6 +34,7 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Publishers/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
@@ -49,6 +44,7 @@ namespace LibraryApplication.Web.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Name")] Publisher publisher)
         {
@@ -62,6 +58,7 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Publishers/Edit/5
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(Guid id)
         {
             var publisher = _publisherService.GetById(id);
@@ -76,6 +73,7 @@ namespace LibraryApplication.Web.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Guid id, [Bind("Name,Id")] Publisher publisher)
         {
@@ -88,23 +86,38 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Publishers/Delete/5
-        public IActionResult Delete(Guid id)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(Guid? id)
         {
-            var publisher = _publisherService.GetById(id);
-            if (publisher == null)
+            if (id == null)
+            {
+                ViewData["DeleteAll"] = true;
+                return View();
+            }
+
+            var book = _publisherService.GetById(id.Value);
+            if (book == null)
             {
                 return NotFound();
             }
 
-            return View(publisher);
+            return View(book);
         }
 
         // POST: Publishers/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(Guid id)
+        public IActionResult DeleteConfirmed(Guid? id)
         {
-            _publisherService.DeleteById(id);
+            if (id == null)
+            {
+                _publisherService.DeleteAll();
+            }
+            else
+            {
+                _publisherService.DeleteById(id.Value);
+            }
             return RedirectToAction(nameof(Index));
         }
 

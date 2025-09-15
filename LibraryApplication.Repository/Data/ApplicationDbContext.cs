@@ -12,9 +12,9 @@ namespace LibraryApplication.Repository.Data
         {
         }
 
-        public virtual DbSet<Category> Categories { get; set; }    
-        public virtual DbSet<Author> Authors { get; set; }    
-        public virtual DbSet<Publisher> Publishers { get; set; }            
+        public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Author> Authors { get; set; }
+        public virtual DbSet<Publisher> Publishers { get; set; }
         public virtual DbSet<Book> Books { get; set; }
         public virtual DbSet<Loan> Loans { get; set; }
         public virtual DbSet<Reservation> Reservations { get; set; }

@@ -2,7 +2,6 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace LibraryApplication.Service.Implementation
 {
@@ -21,7 +20,7 @@ namespace LibraryApplication.Service.Implementation
 
         public Loan? GetById(Guid loanId)
         {
-            return _loanRepository.Get(selector: x=>x, predicate: x=>x.Id.Equals(loanId), include: x=>x.Include(z=>z.BorrowedBook));
+            return _loanRepository.Get(selector: x => x, predicate: x => x.Id.Equals(loanId), include: x => x.Include(z => z.BorrowedBook));
         }
 
         public Loan? GetActiveLoanForBook(Guid bookId)
@@ -50,11 +49,11 @@ namespace LibraryApplication.Service.Implementation
 
         public Loan LoanBook(Guid bookId, string userId, Guid? reservationId)
         {
-            if(string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException("UserId required", nameof(userId));
+            if (string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException("UserId required", nameof(userId));
 
             var activeLoan = GetActiveLoanForBook(bookId);
             if (activeLoan != null) throw new InvalidOperationException("Book is currently loaned. Make a reservation or wait your turn.");
-            
+
             var book = _bookService.GetById(bookId) ?? throw new Exception("Book not found");
 
             var loan = new Loan
@@ -88,7 +87,7 @@ namespace LibraryApplication.Service.Implementation
             var loan = GetById(loanId);
             if (loan == null) throw new Exception("Loan not found");
             if (!string.Equals(loan.UserId, userId, StringComparison.OrdinalIgnoreCase)) throw new Exception("User not permitted to return book");
-            
+
             loan.DateReturned = DateOnly.FromDateTime(DateTime.UtcNow);
             Update(loan);
             Console.WriteLine("Loan DateReturned: " + loan.DateReturned);
@@ -103,10 +102,10 @@ namespace LibraryApplication.Service.Implementation
             {
                 _reservationService.ActivateReservation(next.Id, next.UserId);
             }
-            else 
+            else
             {
-               //book is only available after there are no more reservations in the queue
-                book.IsAvailable = true;            
+                //book is only available after there are no more reservations in the queue
+                book.IsAvailable = true;
                 _bookService.Update(book);
             }
         }
