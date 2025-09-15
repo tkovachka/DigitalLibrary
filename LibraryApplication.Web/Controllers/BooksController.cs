@@ -31,6 +31,8 @@ namespace LibraryApplication.Web.Controllers
             _googleBookImporter=googleBookImporter;
         }
 
+
+
         // GET: Books
         public IActionResult Index()
         {
@@ -181,8 +183,14 @@ namespace LibraryApplication.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public IActionResult Import()
+        {
+            return View();
+        }
+
+        //API
         [HttpPost]
-        public async Task<IActionResult> ImportFromGoogle(string query, int count = 10, CancellationToken ct = default)
+        public async Task<IActionResult> ImportFromGoogle([FromForm] string query, [FromForm] int count = 10, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(query)) return BadRequest("query required");
             if (count < 1) return BadRequest("count must be > 0");
@@ -193,14 +201,13 @@ namespace LibraryApplication.Web.Controllers
             {
                 var books = await _googleBooksClient.SearchAndParseAsync(query, count, ct);
                 var (inserted, skipped) = await _googleBookImporter.ImportAsync(books, ct);
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
-            //return Ok(new { requested = count, found = books.Count, inserted, skipped });
-            return RedirectToAction(nameof(Index));
         }
+
     }
 }

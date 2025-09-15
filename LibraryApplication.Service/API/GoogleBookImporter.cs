@@ -1,12 +1,6 @@
 ﻿using LibraryApplication.Domain.Domain;
 using LibraryApplication.Domain.DTO;
-using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LibraryApplication.Service.API
 {
