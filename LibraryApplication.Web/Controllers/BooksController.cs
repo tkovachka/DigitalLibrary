@@ -1,5 +1,6 @@
 ﻿using LibraryApplication.Service.API;
 using LibraryApplication.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
@@ -103,6 +104,7 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Books/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             ViewData["Authors"] = new SelectList(_authorService.GetAll(), "Id", "Name");
@@ -115,6 +117,7 @@ namespace LibraryApplication.Web.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public IActionResult Create([Bind("Isbn10,Isbn13,Title,Subtitle,PublishedDate,PageCount,Language,AverageRating,RatingsCount,Description,ThumbnailUrl,PublisherId,AuthorIds,CategoryIds")] Book book)
         {
@@ -131,6 +134,7 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Books/Edit/5
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(Guid id)
         {
             var book = _bookService.GetById(id);
@@ -148,6 +152,7 @@ namespace LibraryApplication.Web.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Guid id, [Bind("Isbn10,Isbn13,Title,Subtitle,PublishedDate,PageCount,Language,AverageRating,RatingsCount,Description,ThumbnailUrl,PublisherId,AuthorIds,CategoryIds,Id")] Book book)
         {
@@ -163,6 +168,7 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // GET: Books/Delete/5
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(Guid id)
         {
             var book =_bookService.GetById(id);
@@ -175,7 +181,8 @@ namespace LibraryApplication.Web.Controllers
         }
 
         // POST: Books/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]        
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid id)
         {
@@ -183,13 +190,16 @@ namespace LibraryApplication.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Import()
         {
             return View();
         }
 
         //API
-        [HttpPost]
+        [HttpPost, ActionName("Import")]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ImportFromGoogle([FromForm] string query, [FromForm] int count = 10, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(query)) return BadRequest("query required");

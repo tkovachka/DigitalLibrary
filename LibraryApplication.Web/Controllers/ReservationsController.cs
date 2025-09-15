@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace LibraryApplication.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "User")]
     public class ReservationsController : Controller
     {
         private readonly IReservationService _reservationService;

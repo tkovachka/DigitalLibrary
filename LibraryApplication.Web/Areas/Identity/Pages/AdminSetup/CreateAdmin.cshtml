@@ -1,0 +1,39 @@
+﻿@page
+@model LibraryApplication.Web.Areas.Identity.Pages.AdminSetup.CreateAdminModel
+@{
+    ViewData["Title"] = "Create Admin Account";
+}
+
+<h2>Create Admin Account</h2>
+
+@if (!Model.CanRegisterAdmin)
+{
+    <div class="alert alert-info">
+        Admin account already exists. Admin registration is disabled.
+    </div>
+}
+else
+{
+    <form method="post">
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" type="password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ConfirmPassword" class="form-label"></label>
+            <input asp-for="ConfirmPassword" type="password" class="form-control" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Admin</button>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

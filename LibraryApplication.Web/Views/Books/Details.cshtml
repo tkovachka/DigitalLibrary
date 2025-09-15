@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    @using Microsoft.AspNetCore.Identity
+    @inject UserManager<LibraryApplication.Domain.Identity.LibraryApplicationUser> UserManager
 }
 
 <h1>Details</h1>
@@ -11,42 +13,48 @@
     <h4>Book Details</h4>
     <div>
         <a asp-action="Index" class="btn btn-info">Back to List</a>
-        <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model.Id">Edit</a>
-        <a asp-action="Delete" class="btn btn-danger" asp-route-id="@Model.Id">Delete</a>
-        @if (ViewBag.UsersLoan)
+        <!-- Admin only sees Edit and Delete, cannot Loan or Reserve -->
+        @if (User.IsInRole("Admin"))
         {
-            <!-- User has the loan -->
-            <form asp-controller="Loans" asp-action="Return" method="get" style="display:inline;">
-                <input type="hidden" name="id" value="@ViewBag.LoanId" />
-                <button type="submit" class="btn btn-warning">Return Book</button>
-            </form>
+            <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model.Id">Edit</a>
+            <a asp-action="Delete" class="btn btn-danger" asp-route-id="@Model.Id">Delete</a>
         }
-        else if (Model.IsAvailable || ViewBag.ActiveReservation)
-        {
-            <!-- Book available -->
-            <form asp-controller="Loans" asp-action="Loan" method="post" style="display:inline;">
-                <input type="hidden" name="bookId" value="@Model.Id" />
-                @if (ViewBag.ActiveReservation){
-                    <p>It is your turn to loan the book!</p>
-                }
-                <button type="submit" class="btn btn-success">Loan Book</button>
-            </form>
-        }
-        else if (ViewBag.UsersReservation)
-        {
-            <!-- User has a reservation -->
-            <form asp-controller="Reservations" asp-action="Cancel" method="post" style="display:inline;">
-                <input type="hidden" name="id" value="@ViewBag.ReservationId" />
-                <button type="submit" class="btn btn-warning">Cancel Reservation</button>
-            </form>
-        }
-        else
-        {
-            <!-- Book loaned by someone else, user has no reservation -->
-            <form asp-controller="Reservations" asp-action="Reserve" method="get" style="display:inline;">
-                <input type="hidden" name="bookId" value="@Model.Id" />
-                <button type="submit" class="btn btn-warning">Reserve Book</button>
-            </form>
+        else {
+            @if (ViewBag.UsersLoan)
+            {
+                <!-- User has the loan -->
+                <form asp-controller="Loans" asp-action="Return" method="get" style="display:inline;">
+                    <input type="hidden" name="id" value="@ViewBag.LoanId" />
+                    <button type="submit" class="btn btn-warning">Return Book</button>
+                </form>
+            }
+            else if (Model.IsAvailable || ViewBag.ActiveReservation)
+            {
+                <!-- Book available -->
+                <form asp-controller="Loans" asp-action="Loan" method="post" style="display:inline;">
+                    <input type="hidden" name="bookId" value="@Model.Id" />
+                    @if (ViewBag.ActiveReservation){
+                        <p>It is your turn to loan the book!</p>
+                    }
+                    <button type="submit" class="btn btn-success">Loan Book</button>
+                </form>
+            }
+            else if (ViewBag.UsersReservation)
+            {
+                <!-- User has a reservation -->
+                <form asp-controller="Reservations" asp-action="Cancel" method="post" style="display:inline;">
+                    <input type="hidden" name="id" value="@ViewBag.ReservationId" />
+                    <button type="submit" class="btn btn-warning">Cancel Reservation</button>
+                </form>
+            }
+            else
+            {
+                <!-- Book loaned by someone else, user has no reservation -->
+                <form asp-controller="Reservations" asp-action="Reserve" method="get" style="display:inline;">
+                    <input type="hidden" name="bookId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-warning">Reserve Book</button>
+                </form>
+            }
         }
 
     </div>

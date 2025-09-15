@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace LibraryApplication.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "User")]
     public class LoansController : Controller
     {
         private readonly ILoanService _loanService;

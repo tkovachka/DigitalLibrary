@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using LibraryApplication.Domain.Identity;
 using LibraryApplication.Repository.Data;
 using LibraryApplication.Repository.Implementation;
@@ -5,10 +6,19 @@ using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.API;
 using LibraryApplication.Service.Implementation;
 using LibraryApplication.Service.Interface;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-
 internal class Program
 {
+    public class NullEmailSender : IEmailSender
+    {
+        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        {
+            // Do nothing, just return completed task, implement later 
+            return Task.CompletedTask;
+        }
+    }
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -19,11 +29,25 @@ internal class Program
             options.UseSqlServer(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.AddDefaultIdentity<LibraryApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+        builder.Services.AddDefaultIdentity<LibraryApplicationUser>(options => 
+        {
+            options.SignIn.RequireConfirmedAccount = false;
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 8;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+        })
+        .AddRoles<IdentityRole>()
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders()
+        .AddDefaultUI();
+
+        builder.Services.AddSingleton<IEmailSender, NullEmailSender>();
 
         builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+        builder.Services.AddRazorPages();
 
         builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         builder.Services.AddTransient<ICategoryService, CategoryService>();
@@ -54,12 +78,45 @@ internal class Program
 
         app.UseRouting();
 
+        // Ensure database is seeded with roles
+        void SeedRolesAndRedirect()
+        {
+            using var scope = app.Services.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<LibraryApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            Task.Run(async () =>
+            {
+                var roles = new[] { "Admin", "User" };
+                foreach (var role in roles)
+                {
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(role));
+                    }
+                }
+            }).GetAwaiter().GetResult();
+        }
+
+        SeedRolesAndRedirect();
+
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Books}/{action=Index}/{id?}");
         app.MapRazorPages();
+
+        app.MapGet("/", async (UserManager<LibraryApplicationUser> userManager) =>
+        {
+            var admins = await userManager.GetUsersInRoleAsync("Admin");
+            if (!admins.Any())
+            {
+                return Results.Redirect("/Identity/AdminSetup/CreateAdmin");
+            }
+            return Results.Redirect("/Books/Index");
+        });
 
         app.Run();
     }
