@@ -22,6 +22,7 @@ namespace LibraryApplication.Web.Controllers
         public IActionResult Index()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return RedirectToAction("Register", "Account");
             return View(_reservationService.GetReservationsByUser(userId));
         }
 
@@ -43,7 +44,7 @@ namespace LibraryApplication.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ReserveConfirm(Guid bookId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
             try
             {
                 _reservationService.ReserveBook(bookId, userId);
@@ -51,9 +52,8 @@ namespace LibraryApplication.Web.Controllers
             }
             catch (Exception ex)
             {
-                //todo show error to user
                 TempData["Error"] = ex.Message;
-                return NotFound(ex.Message);
+                return RedirectToAction("Reserve", new { bookId });
             }
         }
 
@@ -67,7 +67,7 @@ namespace LibraryApplication.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CancelConfirm(Guid id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
             try
             {
                 _reservationService.CancelReservation(id, userId);
@@ -75,9 +75,8 @@ namespace LibraryApplication.Web.Controllers
             }
             catch (Exception ex)
             {
-                //todo show error to user
                 TempData["Error"] = ex.Message;
-                return NotFound(ex.Message);
+                return RedirectToAction("Cancel", new { id });
             }
         }
 

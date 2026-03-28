@@ -2,6 +2,7 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace LibraryApplication.Service.Implementation
@@ -10,11 +11,13 @@ namespace LibraryApplication.Service.Implementation
     {
         private readonly IRepository<Reservation> _reservationRepository;
         private readonly IRepository<Loan> _loanRepository;
+        private readonly ILogger<ReservationService> _logger;
 
-        public ReservationService(IRepository<Reservation> reservationRepository, IRepository<Loan> loanRepository)
+        public ReservationService(IRepository<Reservation> reservationRepository, IRepository<Loan> loanRepository, ILogger<ReservationService> logger)
         {
-            _reservationRepository=reservationRepository;
-            _loanRepository=loanRepository;
+            _reservationRepository = reservationRepository;
+            _loanRepository = loanRepository;
+            _logger = logger;
         }
 
         public void CancelReservation(Guid reservationId, string userId)
@@ -48,7 +51,8 @@ namespace LibraryApplication.Service.Implementation
                 res.QueuePosition = idx++;
                 Update(res);
             }
-
+            _logger.LogInformation("Reservation {ReservationId} cancelled by user {UserId}",
+                reservationId, userId);
         }
 
         public List<Reservation> GetQueueForBook(Guid bookId)
@@ -89,6 +93,8 @@ namespace LibraryApplication.Service.Implementation
             };
 
             Insert(reservation);
+            _logger.LogInformation("Reservation {ReservationId} for Book {BookId} created by user {UserId}",
+                reservation.Id, bookId, userId);
             return reservation;
         }
 
@@ -106,6 +112,8 @@ namespace LibraryApplication.Service.Implementation
 
             reservation.IsActive = true;
             _reservationRepository.Update(reservation);
+            _logger.LogInformation("Reservation {ReservationId} activated for user {UserId}",
+                reservationId, userId);
 
         }
 
@@ -129,6 +137,8 @@ namespace LibraryApplication.Service.Implementation
                 r.QueuePosition--;
                 Update(r);
             }
+            _logger.LogInformation("Reservation {ReservationId} fulfilled for user {UserId}",
+                reservationId, userId);
         }
 
         public Reservation Insert(Reservation reservation)

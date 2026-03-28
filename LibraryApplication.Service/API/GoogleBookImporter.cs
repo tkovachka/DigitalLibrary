@@ -86,6 +86,19 @@ namespace LibraryApplication.Service.API
                     book.Publisher = pub;
                     book.PublisherId = pub.Id;
                 }
+                else
+                {
+                    // Fallback: assign to a shared "Unknown Publisher"
+                    const string unknownName = "Unknown Publisher";
+                    if (!publisherByName.TryGetValue(unknownName, out var unknown))
+                    {
+                        unknown = new Publisher { Id = Guid.NewGuid(), Name = unknownName };
+                        publisherByName.Add(unknownName, unknown);
+                        newPublishers.Add(unknown);
+                    }
+                    book.Publisher = unknown;
+                    book.PublisherId = unknown.Id;
+                }
 
                 // Authors
                 foreach (var authorName in dto.Authors.Distinct(StringComparer.OrdinalIgnoreCase))
@@ -135,9 +148,9 @@ namespace LibraryApplication.Service.API
             using var transaction = await _bookService.BeginTransactionAsync();
             try
             {
-                if (newPublishers.Any()) _publisherService.InsertAll(newPublishers, saveChanges: false);
-                if (newAuthors.Any()) _authorService.InsertAll(newAuthors, saveChanges: false);
-                if (newCategories.Any()) _categoryService.InsertAll(newCategories, saveChanges: false);
+                if (newPublishers.Any()) _publisherService.InsertAll(newPublishers, saveChanges: true);
+                if (newAuthors.Any()) _authorService.InsertAll(newAuthors, saveChanges: true);
+                if (newCategories.Any()) _categoryService.InsertAll(newCategories, saveChanges: true);
                 if (toInsertBooks.Any()) _bookService.InsertAll(toInsertBooks, saveChanges: true);
 
                 await transaction.CommitAsync();
