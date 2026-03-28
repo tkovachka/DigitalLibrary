@@ -1,92 +1,52 @@
 ﻿@using LibraryApplication.Domain.Domain
 @model Book
-
 @{
-    ViewData["Title"] = "Loan";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Borrow Book";
 }
 
-<h1>Loan</h1>
+<a asp-action="Index" asp-controller="Books" class="btn btn-outline-secondary btn-sm mb-3">← Back to Books</a>
+<p class="section-eyebrow">Confirm Loan</p>
+<h1>Borrow This Book</h1>
+<hr />
 
-<h3>You are about to make a Loan</h3>
-<h3>Loan Rules:</h3>
-<p>
-    <ul>
-        <li>Once you make a new Loan you have the book for 14 days, after that the Loan expires and you lose the book,</li>
-        <li>You can return the book earlier if you finish faster (please do, in case there are any reservations),</li>
-        <li>You can only have 3 loans at the same time, but be mindful that their expiration dates might be the same if you loan them all at the same time.</li>
-    </ul>
-</p>
-<div>
-    <h4>Book</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            Cover
-        </dt>
-        <dd class="col-sm-10">
-            <img src="@Model.ThumbnailUrl" style="height:350px;"/>
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Isbn13)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Isbn13)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PublishedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PublishedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PageCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PageCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Language)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Language)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AverageRating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AverageRating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RatingsCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RatingsCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Publisher)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Publisher.Name)
-        </dd>
-    </dl>
-    
-    <form asp-action="LoanConfirm" method="post">
+<div class="confirm-panel">
+    <div class="confirm-book-strip">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" alt="@Model.Title" />
+        }
+        <div class="confirm-book-meta">
+            <h3>@Model.Title</h3>
+            @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+            {
+                <p>@Model.Subtitle</p>
+            }
+            @if (Model.Authors.Any())
+            {
+                <p>by @string.Join(", ", Model.Authors.Select(a => a.Name))</p>
+            }
+            @if (Model.Publisher != null)
+            {
+                <p>@Model.Publisher.Name@(Model.PublishedDate.HasValue ? $" · {Model.PublishedDate.Value.Year}" : "")</p>
+            }
+            @if (Model.PageCount.HasValue)
+            {
+                <p>@Model.PageCount pages</p>
+            }
+        </div>
+    </div>
+    <div class="rules-box">
+        <h4>Borrowing Rules</h4>
+        <ul>
+            <li>You have <strong>14 days</strong> to read and return this book.</li>
+            <li>You may return early — others may be waiting in queue.</li>
+            <li>After 14 days, the loan expires automatically.</li>
+        </ul>
+    </div>
+    <form asp-action="LoanConfirm" method="post" class="d-flex gap-2">
         <input type="hidden" name="bookId" value="@Model.Id" />
         <input type="hidden" name="reservationId" value="@ViewBag.ReservationId" />
-        <input type="submit" value="Confirm Loan" class="btn btn-success" /> 
-        <a asp-action="Index" asp-controller="Books">Cancel and go back to Books</a>
+        <button type="submit" class="btn btn-success btn-lg">Confirm Borrow</button>
+        <a asp-action="Index" asp-controller="Books" class="btn btn-outline-secondary">Cancel</a>
     </form>
 </div>

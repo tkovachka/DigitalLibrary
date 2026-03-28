@@ -1,87 +1,81 @@
 ﻿@model List<Book>
-
 @{
     ViewData["Title"] = "Books";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-@using LibraryApplication.Domain.Domain
+    @using LibraryApplication.Domain.Domain
     @using Microsoft.AspNetCore.Identity
-    @inject UserManager<LibraryApplication.Domain.Identity.LibraryApplicationUser> UserManager
+@inject UserManager<LibraryApplication.Domain.Identity.LibraryApplicationUser> UserManager
 }
 
-<h1>Browse All Books</h1>
-
-<div class="container">
-   @if (User.IsInRole("Admin"))
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-2">
+    <div>
+        <p class="section-eyebrow mb-1">Collection</p>
+        <h1 style="margin-bottom:0">All Books</h1>
+    </div>
+    @if (User.IsInRole("Admin"))
     {
-        <div class="btn-group mb-2">
-            <a asp-action="Create" class="btn btn-success">Create New</a>
-            <a asp-action="Import" class="btn btn-outline-success">Import</a>
+        <div class="admin-bar" style="margin-bottom:0">
+            <span class="admin-bar__label">Admin</span>
+            <a asp-action="Create" class="btn btn-success btn-sm">+ Add Book</a>
+            <a asp-action="Import" class="btn btn-outline-success btn-sm">↓ Import</a>
+            <a asp-action="Delete" class="btn btn-danger btn-sm">✕ Delete All</a>
         </div>
-        <br />
-        <a asp-action="Delete" class="btn btn-danger">Delete All Books</a>
-        <hr />
-    }
-    
-    @for (int i = 0; i < Model.Count; i++)
-    {
-        var item = Model[i];
-
-        if (i % 4 == 0)
-        {
-            @:<div class="row mb-4">
-        }
-
-        <div class="col-12 col-md-6 col-lg-3 mb-4">
-            <div class="card h-100 shadow-sm">
-                @if (!string.IsNullOrWhiteSpace(item.ThumbnailUrl))
-                {
-                    <img src="@item.ThumbnailUrl" class="card-img-top" alt="@item.Title" />
-                }
-
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">@item.Title</h5>
-                    @if (!string.IsNullOrWhiteSpace(item.Subtitle))
-                    {
-                        <h6 class="card-subtitle mb-2 text-muted">@item.Subtitle</h6>
-                    }
-
-                    <p class="card-text mb-2">
-                        <strong>ISBN-10:</strong> @item.Isbn10<br />
-                        <strong>Page count:</strong> @item.PageCount<br />
-                        <strong>Average rating:</strong> @item.AverageRating<br />
-                        <strong>Publisher:</strong> @item.Publisher?.Name
-                    </p>
-
-                    <p class="fw-semibold mb-1"><strong>Authors</strong></p>
-                    <ul class="list-unstyled mb-2">
-                        @foreach (var author in item.Authors)
-                        {
-                            <li>@author.Name</li>
-                        }
-                    </ul>
-
-                    <p class="fw-semibold mb-1"><strong>Categories</strong></p>
-                    <ul class="list-inline mb-0">
-                        @foreach (var cat in item.Categories)
-                        {
-                            <li class="list-inline-item badge bg-dark text-white">@cat.Name</li>
-                        }
-                    </ul>
-                </div>
-
-                <div class="card-footer bg-white border-0">
-                    @if (User.IsInRole("Admin")){
-                        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                    }
-                    <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                </div>
-            </div>
-        </div>
-
-        if (i % 4 == 3 || i == Model.Count - 1)
-        {
-            @:</div>
-        }
     }
 </div>
+<hr />
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <span class="empty-state-icon">📚</span>
+        <h3>No books yet</h3>
+        <p>The collection is empty.</p>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Import" class="btn btn-primary">Import from Google Books</a>
+        }
+    </div>
+}
+else
+{
+    <div class="books-grid">
+        @foreach (var item in Model)
+        {
+            <div class="book-card">
+                <div class="book-card__cover">
+                    @if (!string.IsNullOrWhiteSpace(item.ThumbnailUrl))
+                    {
+                        <img src="@item.ThumbnailUrl" alt="@item.Title" loading="lazy" />
+                    }
+                    else
+                    {
+                        <span class="book-card__cover-placeholder">📖</span>
+                    }
+                    <span class="book-card__availability @(item.IsAvailable ? "badge-available" : "badge-unavailable")">
+                        @(item.IsAvailable ? "Available" : "On Loan")
+                    </span>
+                </div>
+                <div class="book-card__body">
+                    <div class="book-card__title">@item.Title</div>
+                    @if (item.Authors.Any())
+                    {
+                        <div class="book-card__author">@string.Join(", ", item.Authors.Select(a => a.Name))</div>
+                    }
+                    <div class="book-card__cats">
+                        @foreach (var cat in item.Categories.Take(2))
+                        {
+                            <span class="badge badge-burgundy">@cat.Name</span>
+                        }
+                    </div>
+                </div>
+                <div class="book-card__footer">
+                    <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a class="btn btn-primary btn-sm" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

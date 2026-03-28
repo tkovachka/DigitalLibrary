@@ -1,63 +1,52 @@
 ﻿@model LibraryApplication.Domain.Domain.Reservation
-
 @{
-    ViewData["Title"] = "Details";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Reservation Details";
 }
 
-<h1>Details</h1>
+<a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3">← My Reservations</a>
+<p class="section-eyebrow">Reservation Details</p>
+<h1>@Model.Book?.Title</h1>
+<hr />
 
-<div>
-    <h4>Reservation</h4>
-    <div>
+<div class="confirm-panel">
+    @if (Model.IsActive)
+    {
+        <div class="activation-banner">
+            <span class="icon">🔔</span>
+            <div>
+                <h4>It's your turn!</h4>
+                <p>The book is reserved for you. Borrow it before your reservation expires.</p>
+            </div>
+        </div>
+    }
+
+    <div class="confirm-book-strip">
+        @if (!string.IsNullOrWhiteSpace(Model.Book?.ThumbnailUrl))
+        {
+            <img src="@Model.Book.ThumbnailUrl" alt="" />
+        }
+        <div class="confirm-book-meta">
+            <h3>@Model.Book?.Title</h3>
+            @if (Model.Book?.Authors != null && Model.Book.Authors.Any())
+            {
+                <p>by @string.Join(", ", Model.Book.Authors.Select(a => a.Name))</p>
+            }
+            <p>ISBN: @Model.Book?.Isbn13</p>
+            <p>Requested: @Model.DateRequested</p>
+            <p>Queue position: <strong>@Model.QueuePosition</strong></p>
+            @if (Model.ExpirationDate.HasValue)
+            {
+                <p>Expires: @Model.ExpirationDate</p>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
         @if (Model.IsActive)
         {
-            <h3>It is now your turn to Loan the book!</h3>
-            <a class="btn btn-success" asp-action="Loan" asp-controller="Loans" asp-route-bookId="@Model.BookId">Loan now!</a>
+            <a class="btn btn-success" asp-action="Loan" asp-controller="Loans" asp-route-bookId="@Model.BookId">Borrow Now</a>
         }
-        <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn btn-danger">Cancel Reservation</a> | 
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Cancel" asp-route-id="@Model.Id" class="btn btn-danger">Cancel Reservation</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
     </div>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Book.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Book.Title)
-        </dd>
-        <dt class="col-sm-2">
-            Authors
-        </dt>
-        <dd class="col-sm-10">
-            <ul class="list-unstyled mb-2">
-                @foreach (var author in @Model.Book.Authors)
-                {
-                    <li>@author.Name</li>
-                }
-            </ul>
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Book.Isbn13)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Book.Isbn13)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.QueuePosition)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.QueuePosition)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateRequested)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateRequested)
-        </dd>
-        <dt>Cover</dt>
-        <dd>
-            <img src="@Model.Book.ThumbnailUrl"/>
-        </dd>
-    </dl>
 </div>

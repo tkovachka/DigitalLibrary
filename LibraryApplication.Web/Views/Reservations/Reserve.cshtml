@@ -1,59 +1,41 @@
 ﻿@using LibraryApplication.Domain.Domain
 @model Book
-
 @{
-    ViewData["Title"] = "Reserve";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Reserve Book";
 }
 
-<h1>Reserve</h1>
+<a asp-action="Index" asp-controller="Books" class="btn btn-outline-secondary btn-sm mb-3">← Back to Books</a>
+<p class="section-eyebrow">Confirm Reservation</p>
+<h1>Reserve This Book</h1>
+<hr />
 
-<h2>Reservation Rules:</h2>
-<div>
-    <h3>Reserving a book means getting on the queue for the next loan of the book.</h3>
-    <ul>
-        <li>Once it is your turn, you will get have 3 days to activate your loan, otherwise your reservation will expire and you will have to get on the queue again.</li>
-        <li>You can cancel your reservation at any time, even when it is your turn but you change your mind.</li>
-        <li>After you activate your Loan or your Reservation expires (whichever comes first), the Reservation will be deleted and no further records will be kept. We only keep current, active reservations.</li>
-    </ul>
-
-    <h4>Reservation For Book</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">Book Cover</dt>
-        <dd class="col-sm-10">
-            <img style="height:350px;" src="@Model.ThumbnailUrl"/>
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class="col-sm-2">Author(s)</dt>
-        <dd class="col-sm-10">
-            <ul class="list-unstyled mb-2">
-                @foreach (var author in @Model.Authors)
-                {
-                    <li>@author.Name</li>
-                }
-            </ul>
-        </dd>
-        <dt class="col-sm-2">Categories</dt>
-        <dd class="col-sm-10">
-            <ul class="list-inline mb-0">
-                @foreach (var cat in @Model.Categories)
-                {
-                    <li class="list-inline-item badge bg-secondary">@cat.Name</li>
-                }
-            </ul>
-        </dd>
-    </dl>
-    
-    <form asp-action="ReserveConfirm" method="post">
+<div class="confirm-panel">
+    <div class="confirm-book-strip">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" alt="@Model.Title" />
+        }
+        <div class="confirm-book-meta">
+            <h3>@Model.Title</h3>
+            @if (Model.Authors.Any())
+            {
+                <p>by @string.Join(", ", Model.Authors.Select(a => a.Name))</p>
+            }
+            <p style="color:var(--danger);font-weight:600">Currently on loan</p>
+        </div>
+    </div>
+    <div class="rules-box">
+        <h4>Reservation Rules</h4>
+        <ul>
+            <li>You'll be added to the waiting queue for this book.</li>
+            <li>When it's your turn, you'll have <strong>3 days</strong> to borrow it.</li>
+            <li>If you don't borrow within 3 days, your reservation expires and the next person is notified.</li>
+            <li>You can cancel your reservation at any time.</li>
+        </ul>
+    </div>
+    <form asp-action="ReserveConfirm" method="post" class="d-flex gap-2">
         <input type="hidden" name="bookId" value="@Model.Id" />
-        <input type="submit" value="Reserve" class="btn btn-success btn-lg" />
-        <p>By making a reservation you agree to the reservation rules</p>
-        <a asp-action="Index">Cancel and go back to All Books</a>
+        <button type="submit" class="btn btn-primary btn-lg">Confirm Reservation</button>
+        <a asp-action="Index" asp-controller="Books" class="btn btn-outline-secondary">Cancel</a>
     </form>
 </div>

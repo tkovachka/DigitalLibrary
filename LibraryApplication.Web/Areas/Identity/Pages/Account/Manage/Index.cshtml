@@ -1,0 +1,96 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<p class="section-eyebrow">My Account</p>
+<h1>My Profile</h1>
+<hr />
+
+<div style="max-width:680px">
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert @(Model.StatusMessage.StartsWith("Error") ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="folio-card mb-4">
+        <div class="folio-card-header d-flex align-items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            Profile Information
+        </div>
+        <div class="folio-card-body">
+            <form id="profile-form" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="form-group">
+                    <label class="control-label">Username</label>
+                    <input type="text" class="form-control" value="@Model.Username" disabled
+                           style="background:var(--cream-dark);color:var(--text-muted)" />
+                    <small style="font-size:0.75rem;color:var(--text-muted)">Username cannot be changed.</small>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Name" class="control-label">First Name</label>
+                    <input asp-for="Input.Name" class="form-control" />
+                    <span asp-validation-for="Input.Name" class="text-danger" style="font-size:0.8rem"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Surname" class="control-label">Surname</label>
+                    <input asp-for="Input.Surname" class="form-control" />
+                    <span asp-validation-for="Input.Surname" class="text-danger" style="font-size:0.8rem"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.PhoneNumber" class="control-label">Phone Number</label>
+                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Optional" />
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size:0.8rem"></span>
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button id="update-profile-button" type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="folio-card mb-4">
+        <div class="folio-card-header">Account Details</div>
+        <div class="folio-card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem 2rem">
+                <div>
+                    <div class="book-detail-meta-label">Email Address</div>
+                    <div class="book-detail-meta-value">@Model.Email</div>
+                </div>
+                <div>
+                    <div class="book-detail-meta-label">Email Confirmed</div>
+                    <div class="book-detail-meta-value" style="color:var(--success);font-weight:600">✓ Active</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="folio-card">
+        <div class="folio-card-header">Account Actions</div>
+        <div class="folio-card-body d-flex gap-2 flex-wrap">
+            <a asp-page="./ChangePassword" class="btn btn-outline-secondary">Change Password</a>
+            <a asp-page="./PersonalData" class="btn btn-outline-secondary">Personal Data</a>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

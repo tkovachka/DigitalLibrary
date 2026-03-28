@@ -1,156 +1,145 @@
 ﻿@model Book
-
 @{
-    ViewData["Title"] = "Details";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-@using LibraryApplication.Domain.Domain
+    ViewData["Title"] = Model.Title;
+    @using LibraryApplication.Domain.Domain
     @using Microsoft.AspNetCore.Identity
-    @inject UserManager<LibraryApplication.Domain.Identity.LibraryApplicationUser> UserManager
+@inject UserManager<LibraryApplication.Domain.Identity.LibraryApplicationUser> UserManager
+    string ratingStars = "";
+    if (Model.AverageRating.HasValue)
+    {
+        int full = (int)Math.Floor(Model.AverageRating.Value);
+        for (int s = 0; s < 5; s++) ratingStars += (s < full ? "★" : "☆");
+    }
 }
 
-<h1>Details</h1>
+<a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3">← Back to Books</a>
 
-<div>
-    <h4>Book Details</h4>
-    <div>
-        <a asp-action="Index" class="btn btn-info">Back to List</a>
-        <!-- Admin only sees Edit and Delete, cannot Loan or Reserve -->
-        @if (User.IsInRole("Admin"))
+<div class="book-detail-hero">
+    <div class="book-detail-cover">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
         {
-            <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model.Id">Edit</a>
-            <a asp-action="Delete" class="btn btn-danger" asp-route-id="@Model.Id">Delete</a>
+            <img src="@Model.ThumbnailUrl" alt="@Model.Title" />
         }
-        else {
-            @if (ViewBag.UsersLoan)
+        else
+        {
+            <div class="book-detail-cover-placeholder">📖</div>
+        }
+    </div>
+    <div class="book-detail-info">
+        @if (Model.Categories.Any())
+        {
+            <div class="book-detail-cats">
+                @foreach (var cat in Model.Categories)
+                {
+                    <span class="badge badge-gold">@cat.Name</span>
+                }
+            </div>
+        }
+        <h1 class="book-detail-title">@Model.Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+        {
+            <div class="book-detail-subtitle">@Model.Subtitle</div>
+        }
+        @if (Model.Authors.Any())
+        {
+            <div class="book-detail-authors">by @string.Join(", ", Model.Authors.Select(a => a.Name))</div>
+        }
+        @if (Model.AverageRating.HasValue && Model.AverageRating > 0)
+        {
+            <div class="book-detail-rating">
+                <span>@ratingStars</span>
+                <span>@Model.AverageRating?.ToString("F1") / 5</span>
+                @if (Model.RatingsCount.HasValue)
+                {
+                    <span style="color:var(--text-muted);font-weight:400">(@Model.RatingsCount ratings)</span>
+                }
+            </div>
+        }
+        <div class="book-detail-availability @(Model.IsAvailable ? "availability-yes" : "availability-no")">
+            @(Model.IsAvailable ? "✓ Available to Borrow" : "✕ Currently On Loan")
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="book-detail-description">@Model.Description</div>
+        }
+        <div class="book-detail-meta">
+            @if (Model.Publisher != null)
             {
-                <!-- User has the loan -->
-                <form asp-controller="Loans" asp-action="Return" method="get" style="display:inline;">
-                    <input type="hidden" name="id" value="@ViewBag.LoanId" />
-                    <button type="submit" class="btn btn-warning">Return Book</button>
-                </form>
+                <div class="book-detail-meta-item">
+                    <span class="book-detail-meta-label">Publisher</span>
+                    <span class="book-detail-meta-value">@Model.Publisher.Name</span>
+                </div>
             }
-            else if (Model.IsAvailable || ViewBag.ActiveReservation)
+            @if (Model.PublishedDate.HasValue)
             {
-                <!-- Book available -->
-                <form asp-controller="Loans" asp-action="Loan" method="post" style="display:inline;">
-                    <input type="hidden" name="bookId" value="@Model.Id" />
-                    @if (ViewBag.ActiveReservation){
-                        <p>It is your turn to loan the book!</p>
-                    }
-                    <button type="submit" class="btn btn-success">Loan Book</button>
-                </form>
+                <div class="book-detail-meta-item">
+                    <span class="book-detail-meta-label">Year</span>
+                    <span class="book-detail-meta-value">@Model.PublishedDate.Value.Year</span>
+                </div>
             }
-            else if (ViewBag.UsersReservation)
+            @if (Model.PageCount.HasValue)
             {
-                <!-- User has a reservation -->
-                <form asp-controller="Reservations" asp-action="Cancel" method="post" style="display:inline;">
-                    <input type="hidden" name="id" value="@ViewBag.ReservationId" />
-                    <button type="submit" class="btn btn-warning">Cancel Reservation</button>
-                </form>
+                <div class="book-detail-meta-item">
+                    <span class="book-detail-meta-label">Pages</span>
+                    <span class="book-detail-meta-value">@Model.PageCount</span>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Language))
+            {
+                <div class="book-detail-meta-item">
+                    <span class="book-detail-meta-label">Language</span>
+                    <span class="book-detail-meta-value">@Model.Language.ToUpper()</span>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Isbn13))
+            {
+                <div class="book-detail-meta-item">
+                    <span class="book-detail-meta-label">ISBN-13</span>
+                    <span class="book-detail-meta-value">@Model.Isbn13</span>
+                </div>
+            }
+        </div>
+        <div class="book-detail-actions">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model.Id">Edit</a>
+                <a asp-action="Delete" class="btn btn-danger" asp-route-id="@Model.Id">Delete</a>
+            }
+            else if (User.Identity?.IsAuthenticated == true)
+            {
+                @if ((bool)(ViewBag.UsersLoan ?? false))
+                {
+                    <form asp-controller="Loans" asp-action="Return" method="get" style="display:inline">
+                        <input type="hidden" name="id" value="@ViewBag.LoanId" />
+                        <button type="submit" class="btn btn-warning">↩ Return Book</button>
+                    </form>
+                }
+                else if (Model.IsAvailable || (bool)(ViewBag.ActiveReservation ?? false))
+                {
+                    <form asp-controller="Loans" asp-action="Loan" method="get" style="display:inline">
+                        <input type="hidden" name="bookId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-success btn-lg">Borrow This Book</button>
+                    </form>
+                }
+                else if ((bool)(ViewBag.UsersReservation ?? false))
+                {
+                    <form asp-controller="Reservations" asp-action="Cancel" method="get" style="display:inline">
+                        <input type="hidden" name="id" value="@ViewBag.ReservationId" />
+                        <button type="submit" class="btn btn-warning">Cancel Reservation</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-controller="Reservations" asp-action="Reserve" method="get" style="display:inline">
+                        <input type="hidden" name="bookId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary">Reserve This Book</button>
+                    </form>
+                }
             }
             else
             {
-                <!-- Book loaned by someone else, user has no reservation -->
-                <form asp-controller="Reservations" asp-action="Reserve" method="get" style="display:inline;">
-                    <input type="hidden" name="bookId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-warning">Reserve Book</button>
-                </form>
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success btn-lg">Log in to Borrow</a>
             }
-        }
-
+        </div>
     </div>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Isbn10)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Isbn10)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Isbn13)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Isbn13)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Subtitle)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Subtitle)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PublishedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PublishedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PageCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PageCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Language)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Language)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AverageRating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AverageRating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RatingsCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RatingsCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Publisher)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Publisher.Name)
-        </dd>
-        <dt>Author(s)</dt>
-        <dd>
-            <ul class="list-unstyled mb-2">
-                @foreach (var author in @Model.Authors)
-                {
-                    <li>@author.Name</li>
-                }
-            </ul>
-        </dd>
-        <dt>Categories</dt>
-        <dd>
-            <ul class="list-inline mb-0">
-                @foreach (var cat in @Model.Categories)
-                {
-                    <li class="list-inline-item badge bg-secondary">@cat.Name</li>
-                }
-            </ul>
-        </dd>
-        <dt class="col-sm-2">
-            ThumbNail
-        </dt>
-        <dd class="col-sm-10">
-            <img src="@Model.ThumbnailUrl" alt="@Model.Title Cover Image" />
-        </dd>
-    </dl>
 </div>

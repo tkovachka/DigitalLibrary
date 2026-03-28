@@ -1,108 +1,56 @@
 ﻿@using LibraryApplication.Domain.Domain
 @model Book
-
 @{
-    ViewData["Title"] = "Delete";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var deleteAll = ViewData["DeleteAll"] as bool? ?? false;
+    ViewData["Title"] = "Delete Book"; bool deleteAll = ViewData["DeleteAll"] != null;
 }
 
-<h1>Delete</h1>
+<a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3">← Back to Books</a>
+<h1>@(deleteAll ? "Delete All Books" : "Delete Book")</h1>
+<hr />
 
 @if (deleteAll)
 {
-    <h3>Are you sure you want to delete <strong>ALL books</strong> and reset the database?</h3>
-    <h2>Deleting books will delete <strong>ALL loans and reservations</strong> made for the books.</h2>
-    <form asp-action="Delete" method="post">
-        <button type="submit" class="btn btn-danger">Delete All</button> |
-        <a asp-action="Index">Back to List</a>
-    </form>
-} 
-else 
+    <div class="folio-card" style="max-width:500px">
+        <div class="folio-card-header" style="background:var(--danger)">⚠ Confirm Delete All</div>
+        <div class="folio-card-body">
+            <p>This will permanently delete <strong>every book</strong> in the library. This cannot be undone.</p>
+            <form asp-action="Delete" method="post" class="d-flex gap-2">
+                @Html.AntiForgeryToken()
+                <input type="submit" value="Delete All Books" class="btn btn-danger" />
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+}
+else
 {
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Book</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Isbn10)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Isbn10)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Isbn13)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Isbn13)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Subtitle)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Subtitle)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PublishedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PublishedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PageCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PageCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Language)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Language)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AverageRating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AverageRating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RatingsCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RatingsCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ThumbnailUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ThumbnailUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Publisher)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Publisher.Name)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
-</div>
+    <div class="confirm-panel">
+        <div class="confirm-book-strip">
+            @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+            {
+                <img src="@Model.ThumbnailUrl" alt="@Model.Title" />
+            }
+            <div class="confirm-book-meta">
+                <h3>@Model.Title</h3>
+                @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+                {
+                    <p>@Model.Subtitle</p>
+                }
+                @if (Model.Authors.Any())
+                {
+                    <p>by @string.Join(", ", Model.Authors.Select(a => a.Name))</p>
+                }
+                <p>ISBN: @(Model.Isbn13 ?? Model.Isbn10)</p>
+            </div>
+        </div>
+        <div class="alert alert-danger">
+            Permanently delete <strong>@Model.Title</strong>? This cannot be undone.
+        </div>
+        <form asp-action="Delete" method="post" class="d-flex gap-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="submit" value="Delete Book" class="btn btn-danger" />
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
 }
