@@ -1,59 +1,44 @@
 ﻿@model LibraryApplication.Domain.Domain.Loan
-
 @{
-    ViewData["Title"] = "Details";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Loan Details";
 }
 
-<h1>Details</h1>
+<a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3">← My Loans</a>
+<p class="section-eyebrow">Loan Details</p>
+<h1>@Model.BorrowedBook?.Title</h1>
+<hr />
 
-<div>
-    <h4>Loan</h4>        
-    <a asp-action="Index">Back to List</a>
-    <div>
-        <form method="post" asp-action="Return">
-            <input hidden name="id" value="@Model.Id" />
-            <input type="submit" value="Return Book" class="btn btn-warning" />
-        </form>
-    </div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.BorrowedBook)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.BorrowedBook.Isbn10)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UserId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UserId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateBorrowed)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateBorrowed)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateReturned)
-        </dt>
-        <dd class="col-sm-10">
+<div class="confirm-panel">
+    <div class="confirm-book-strip">
+        @if (!string.IsNullOrWhiteSpace(Model.BorrowedBook?.ThumbnailUrl))
+        {
+            <img src="@Model.BorrowedBook.ThumbnailUrl" alt="" />
+        }
+        <div class="confirm-book-meta">
+            <h3>@Model.BorrowedBook?.Title</h3>
+            <p>Borrowed: @Model.DateBorrowed</p>
             @if (Model.DateReturned != null)
             {
-                @Html.DisplayFor(model => model.DateReturned)
+                <p>Returned: @Model.DateReturned</p>
             }
             else
             {
-                @:Not Returned yet
+
+                <p style="color:var(--success);font-weight:600">Active loan</p>
             }
-        </dd>
-        <dt class="col-sm-2">
-            Book Cover
-        </dt>
-        <dd class="col-sm-10">
-            <img src="@Model.BorrowedBook.ThumbnailUrl" />
-        </dd>
-    </dl>
+        </div>
+    </div>
+    @if (Model.DateReturned == null)
+    {
+        <form method="post" asp-action="Return" class="d-flex gap-2">
+            <input hidden name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-warning">Return Book</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+        </form>
+    }
+    else
+    {
+
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to My Loans</a>
+    }
 </div>

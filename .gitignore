@@ -482,3 +482,12 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Azure deployment noise
+**/serviceDependencies*.json
+
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal

@@ -1,46 +1,41 @@
 ﻿@model LibraryApplication.Domain.Domain.Loan
-
 @{
-    ViewData["Title"] = "Return";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Return Book";
+    var due = Model.DateBorrowed.AddDays(14);
+    var left = due.DayNumber - DateOnly.FromDateTime(DateTime.UtcNow).DayNumber;
 }
 
-<h1>Return</h1>
+<a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-3">← My Loans</a>
+<p class="section-eyebrow">Confirm Return</p>
+<h1>Return This Book</h1>
+<hr />
 
-<h3>Are you sure you want to return this book?</h3>
-<div>
-    <h4>Loan</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            Book Cover
-        </dt>
-        <dd class="col-sm-10">
-            <img src="@Model.BorrowedBook.ThumbnailUrl" style="height:300px;"/>
-        </dd>
-        <dt class = "col-sm-2">
-            Book Title
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BorrowedBook.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateBorrowed)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateBorrowed)
-        </dd>
-        <dt class = "col-sm-2">
-            Days Remaining
-        </dt>
-        <dd class = "col-sm-10">
-            Fix this
-        </dd>
-    </dl>
-    
-    <form asp-action="ReturnConfirmation">
+<div class="confirm-panel">
+    <div class="confirm-book-strip">
+        @if (!string.IsNullOrWhiteSpace(Model.BorrowedBook?.ThumbnailUrl))
+        {
+            <img src="@Model.BorrowedBook.ThumbnailUrl" alt="" />
+        }
+        <div class="confirm-book-meta">
+            <h3>@Model.BorrowedBook?.Title</h3>
+            <p>Borrowed: @Model.DateBorrowed</p>
+            <p>
+                Due: @due
+                @if (left >= 0)
+                {
+                    <span style="color:var(--success);font-weight:700"> — @left days remaining</span>
+                }
+                else
+                {
+
+                    <span style="color:var(--danger);font-weight:700"> — Overdue</span>
+                }
+            </p>
+        </div>
+    </div>
+    <form asp-action="ReturnConfirmation" method="post" class="d-flex gap-2">
         <input type="hidden" asp-for="Id" />
-        <input class="btn btn-danger" type="submit" value="Return" /> 
-        <a asp-action="Index" asp-controller="Books">Cancel and go to All Books</a>
+        <button type="submit" class="btn btn-warning btn-lg">Confirm Return</button>
+        <a asp-action="Index" asp-controller="Books" class="btn btn-outline-secondary">Cancel</a>
     </form>
 </div>

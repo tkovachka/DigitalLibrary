@@ -22,7 +22,7 @@ namespace LibraryApplication.Web.Controllers
         // GET: Loans for current logged in user
         public IActionResult Index()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
             var activeLoans = _loanService.GetLoansByUser(userId);
             var loansHistory = _loanService.GetLoansHistoryByUser(userId);
             ViewData["History"] = loansHistory;
@@ -54,9 +54,8 @@ namespace LibraryApplication.Web.Controllers
             }
             catch (Exception ex)
             {
-                //todo show error to user on screen
                 TempData["Error"] = ex.Message;
-                return NotFound(ex.Message);
+                return RedirectToAction("Loan", new { bookId });
             }
         }
 
@@ -80,7 +79,7 @@ namespace LibraryApplication.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ReturnConfirmation(Guid id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
             try
             {
                 _loanService.ReturnBook(id, userId);
@@ -88,9 +87,8 @@ namespace LibraryApplication.Web.Controllers
             }
             catch (Exception ex)
             {
-                //todo show user error message
                 TempData["Error"] = ex.Message;
-                return NotFound(ex.Message);
+                return RedirectToAction("Return", new { id });
             }
         }
     }

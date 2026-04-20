@@ -2,6 +2,7 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace LibraryApplication.Service.Implementation
 {
@@ -10,12 +11,14 @@ namespace LibraryApplication.Service.Implementation
         private readonly IRepository<Loan> _loanRepository;
         private readonly IReservationService _reservationService;
         private readonly IBookService _bookService;
+        private readonly ILogger<LoanService> _logger;
 
-        public LoanService(IRepository<Loan> loanRepository, IReservationService reservationService, IBookService bookService)
+        public LoanService(IRepository<Loan> loanRepository, IReservationService reservationService, IBookService bookService, ILogger<LoanService> logger)
         {
-            _loanRepository=loanRepository;
-            _reservationService=reservationService;
-            _bookService=bookService;
+            _loanRepository = loanRepository;
+            _reservationService = reservationService;
+            _bookService = bookService;
+            _logger = logger;
         }
 
         public Loan? GetById(Guid loanId)
@@ -74,7 +77,10 @@ namespace LibraryApplication.Service.Implementation
             {
                 _reservationService.FulfillReservation(reservationId.Value, userId);
             }
+            _logger.LogInformation("Book {BookId} on Loan {LoanId} activated for user {UserId}",
+                book.Id, loan.Id, userId);
             return loan;
+            
         }
 
         public Loan Update(Loan loan)
@@ -90,7 +96,8 @@ namespace LibraryApplication.Service.Implementation
 
             loan.DateReturned = DateOnly.FromDateTime(DateTime.UtcNow);
             Update(loan);
-            Console.WriteLine("Loan DateReturned: " + loan.DateReturned);
+            _logger.LogInformation("Loan {LoanId} returned by user {UserId} on {Date}",
+                loanId, userId, loan.DateReturned);
 
             var book = _bookService.GetById(loan.BorrowedBookId);
             if (book == null) throw new Exception("Book not found");

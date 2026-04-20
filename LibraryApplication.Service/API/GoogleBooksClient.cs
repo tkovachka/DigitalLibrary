@@ -1,21 +1,21 @@
 ﻿using LibraryApplication.Domain.DTO;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
+using LibraryApplication.Service.Settings;
+using Microsoft.Extensions.Options;
 
 namespace LibraryApplication.Service.API
 {
     public class GoogleBooksClient
     {
-        private readonly IConfiguration _configuration;
         private readonly HttpClient _http;
         private readonly string? _apiKey;
         private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-        public GoogleBooksClient(HttpClient http, IConfiguration config)
+        public GoogleBooksClient(HttpClient http, IOptions<GoogleBooksSettings> options)
         {
             _http = http;
-            _configuration = config;
-            _apiKey = _configuration["MyApiSettings:ApiKey"];
+            _apiKey = options.Value.ApiKey;
         }
 
         public async Task<List<BookDTO>> SearchAndParseAsync(string query, int totalMax = 10, CancellationToken ct = default)

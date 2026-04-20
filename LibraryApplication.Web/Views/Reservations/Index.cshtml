@@ -1,57 +1,50 @@
 ﻿@model IEnumerable<LibraryApplication.Domain.Domain.Reservation>
-
 @{
-    ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "My Reservations";
 }
 
+<p class="section-eyebrow">My Account</p>
 <h1>My Reservations</h1>
+<hr />
 
 @if (!Model.Any())
 {
-    <p>You have no current reservations. 
-       <a asp-controller="Books" asp-action="Index">Go to all books</a>
-    </p>
-    <p>We don't keep your past reservations.</p>
+    <div class="empty-state">
+        <span class="empty-state-icon">🔖</span>
+        <h3>No active reservations</h3>
+        <p>When a book is on loan, you can reserve your place in queue.</p>
+        <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Browse Books</a>
+    </div>
 }
 else
 {
-    <table class="table">
+    <table class="table-folio">
         <thead>
-            <tr>
-                <th></th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Book.Title)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.QueuePosition)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.DateRequested)
-                </th>
-                <th></th>
-            </tr>
+            <tr><th></th><th>Book</th><th>Position</th><th>Requested</th><th>Status</th><th>Actions</th></tr>
         </thead>
         <tbody>
-    @foreach (var item in Model) {
-            <tr>
-                <td>
-                    <img src="@item.Book.ThumbnailUrl" style="height:200px;"/>
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Book.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.QueuePosition)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DateRequested)
-                </td>
-                <td>
-                    <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                </td>
-            </tr>
-    }
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><img class="book-thumb" src="@item.Book?.ThumbnailUrl" alt="" /></td>
+                    <td><strong style="font-family:'Cormorant Garamond',serif;font-size:1.05rem">@item.Book?.Title</strong></td>
+                    <td><span class="queue-badge @(item.IsActive ? "active" : "")">@item.QueuePosition</span></td>
+                    <td>@item.DateRequested</td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <span style="color:var(--gold);font-weight:700;font-size:.82rem">🔔 Your Turn!</span>
+                        }
+                        else
+                        {
+
+                            <span style="color:var(--text-muted);font-size:.82rem">Waiting</span>
+                        }
+                    </td>
+                    <td><a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@item.Id">Details</a></td>
+                </tr>
+            }
         </tbody>
     </table>
+    <p style="color:var(--text-muted);font-size:.82rem;margin-top:.75rem">Only active reservations are shown. Past reservations are not stored.</p>
 }

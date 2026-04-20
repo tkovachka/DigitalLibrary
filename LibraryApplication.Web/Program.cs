@@ -10,22 +10,15 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 internal class Program
 {
-    public class NullEmailSender : IEmailSender
-    {
-        public Task SendEmailAsync(string email, string subject, string htmlMessage)
-        {
-            // Do nothing, just return completed task, implement later 
-            return Task.CompletedTask;
-        }
-    }
-    private static void Main(string[] args)
+
+    private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlite(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         builder.Services.AddDefaultIdentity<LibraryApplicationUser>(options =>
@@ -77,28 +70,6 @@ internal class Program
 
         app.UseRouting();
 
-        // Ensure database is seeded with roles
-        void SeedRolesAndRedirect()
-        {
-            using var scope = app.Services.CreateScope();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<LibraryApplicationUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            Task.Run(async () =>
-            {
-                var roles = new[] { "Admin", "User" };
-                foreach (var role in roles)
-                {
-                    if (!await roleManager.RoleExistsAsync(role))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(role));
-                    }
-                }
-            }).GetAwaiter().GetResult();
-        }
-
-        SeedRolesAndRedirect();
-
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -116,7 +87,49 @@ internal class Program
             }
             return Results.Redirect("/Books/Index");
         });
+        app.MapGet("/health", () => Results.Ok("healthy"));
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+                var dbPath = connString?.Replace("Data Source=", "").Trim();
+                if (!string.IsNullOrEmpty(dbPath))
+                {
+                    var dir = Path.GetDirectoryName(dbPath);
+                    if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                        Directory.CreateDirectory(dir);
+                }
+
+                db.Database.Migrate();
+                logger.LogInformation("Database migrated successfully.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Database migration failed.");
+                throw;
+            }
+        }
+
+        await SeedRolesAsync(app);
 
         app.Run();
+
+        static async Task SeedRolesAsync(WebApplication app)
+        {
+            await using var scope = app.Services.CreateAsyncScope();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            foreach (var role in new[] { "Admin", "User" })
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                    await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
     }
+
 }

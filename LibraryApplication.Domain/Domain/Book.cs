@@ -2,6 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+namespace LibraryApplication.Domain.Domain;
+
 public class Book : BaseEntity
 {
     public string? Isbn10 { get; set; } = string.Empty;
