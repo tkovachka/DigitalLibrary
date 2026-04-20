@@ -8,10 +8,24 @@ namespace LibraryApplication.Repository.Data
     {
         public ApplicationDbContext CreateDbContext(string[] args)
         {
-            var configuration = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json").Build();
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionsBuilder.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+            var provider = Environment.GetEnvironmentVariable("EF_PROVIDER") ?? "sqlite";
+
+            if (provider.Equals("sqlserver", StringComparison.OrdinalIgnoreCase))
+            {
+                var connString = Environment.GetEnvironmentVariable("EF_CONNECTION_STRING")
+                    ?? throw new InvalidOperationException("Set EF_CONNECTION_STRING env var for SQL Server migrations.");
+                optionsBuilder.UseSqlServer(connString);
+            }
+            else
+            {
+                optionsBuilder.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+            }
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }
