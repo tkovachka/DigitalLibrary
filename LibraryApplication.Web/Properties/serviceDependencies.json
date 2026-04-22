@@ -6,9 +6,9 @@
       "connectionId": "ConnectionStrings:DefaultConnection"
     },
     "mssql2": {
-      "ignored": "true",
       "type": "mssql",
-      "connectionId": "ConnectionStrings:ApplicationDbContextConnection"
+      "connectionId": "ConnectionStrings:ApplicationDbContextConnection",
+      "dynamicId": null
     }
   }
 }

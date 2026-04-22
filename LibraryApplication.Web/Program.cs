@@ -20,22 +20,16 @@ internal class Program
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlServer(connectionString, sqlOptions =>
             {
-                if (builder.Environment.IsDevelopment())
-                {
-                    options.UseSqlite(connectionString);
-                }
-                else
-                {
-                    options.UseSqlServer(connectionString, sqlOptions =>
-                    {
-                        sqlOptions.EnableRetryOnFailure(
-                            maxRetryCount: 5,
-                            maxRetryDelay: TimeSpan.FromSeconds(30),
-                            errorNumbersToAdd: null);
-                    });
-                }
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null);
             });
+        });
+
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
         builder.Services.AddDefaultIdentity<LibraryApplicationUser>(options =>
@@ -51,8 +45,6 @@ internal class Program
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders()
         .AddDefaultUI();
-
-        builder.Services.AddSingleton<IEmailSender, NullEmailSender>();
 
         builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -70,18 +62,6 @@ internal class Program
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseMigrationsEndPoint();
-        }
-        else
-        {
-            app.UseExceptionHandler("/Home/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
-        }
-
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
@@ -89,6 +69,22 @@ internal class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.Use(async (context, next) =>
+        {
+            var path = context.Request.Path;
+            if (path.StartsWithSegments("/Identity/AdminSetup/CreateAdmin"))
+            {
+                var userManager = context.RequestServices.GetRequiredService<UserManager<LibraryApplicationUser>>();
+                var admins = await userManager.GetUsersInRoleAsync("Admin");
+                if (admins.Any())
+                {
+                    context.Response.Redirect("/Books/Index");
+                    return;
+                }
+            }
+            await next();
+        });
 
         app.MapControllerRoute(
             name: "default",
@@ -112,20 +108,7 @@ internal class Program
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
             try
-            {
-                // SQLite only: ensure the data directory exists
-                if (app.Environment.IsDevelopment())
-                {
-                    var connString = builder.Configuration.GetConnectionString("DefaultConnection");
-                    var dbPath = connString?.Replace("Data Source=", "").Trim();
-                    if (!string.IsNullOrEmpty(dbPath))
-                    {
-                        var dir = Path.GetDirectoryName(dbPath);
-                        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                            Directory.CreateDirectory(dir);
-                    }
-                }
-
+            { 
                 db.Database.Migrate();
                 logger.LogInformation("Database migrated successfully.");
             }

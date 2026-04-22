@@ -14,19 +14,10 @@ namespace LibraryApplication.Repository.Data
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            var provider = Environment.GetEnvironmentVariable("EF_PROVIDER") ?? "sqlite";
+            var connString = Environment.GetEnvironmentVariable("EF_CONNECTION_STRING")
+                ?? throw new InvalidOperationException("Set EF_CONNECTION_STRING env var for Azure SQL migrations.");
 
-            if (provider.Equals("sqlserver", StringComparison.OrdinalIgnoreCase))
-            {
-                var connString = Environment.GetEnvironmentVariable("EF_CONNECTION_STRING")
-                    ?? throw new InvalidOperationException("Set EF_CONNECTION_STRING env var for SQL Server migrations.");
-                optionsBuilder.UseSqlServer(connString);
-            }
-            else
-            {
-                optionsBuilder.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
-            }
-
+            optionsBuilder.UseSqlServer(connString);
             return new ApplicationDbContext(optionsBuilder.Options);
         }
     }

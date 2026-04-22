@@ -60,6 +60,7 @@ namespace LibraryApplication.Service.Implementation
         public List<Book> GetAllBooksByAuthorId(Guid authorId)
         {
             var author = _authorService.GetById(authorId);
+            if (author == null) throw new Exception("Author not found");
             return _repository.GetAll(selector: x => x, predicate: x => x.Authors.Contains(author),
                 include: x => x.Include(z => z.Authors).Include(z => z.Publisher).Include(z => z.Categories)).ToList();
         }
@@ -67,6 +68,7 @@ namespace LibraryApplication.Service.Implementation
         public List<Book> GetAllBooksByCategoryId(Guid categoryId)
         {
             var category = _categoryService.GetById(categoryId);
+            if (category == null) throw new Exception("Category not found");
             return _repository.GetAll(selector: x => x, predicate: x => x.Categories.Contains(category),
                 include: x => x.Include(z => z.Authors).Include(z => z.Publisher).Include(z => z.Categories)).ToList();
         }

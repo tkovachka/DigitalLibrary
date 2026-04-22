@@ -2,6 +2,7 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 
 namespace LibraryApplication.Service.Implementation
@@ -23,7 +24,7 @@ namespace LibraryApplication.Service.Implementation
 
         public Loan? GetById(Guid loanId)
         {
-            return _loanRepository.Get(selector: x => x, predicate: x => x.Id.Equals(loanId), include: x => x.Include(z => z.BorrowedBook));
+            return _loanRepository.Get(selector: x => x, predicate: x => x.Id.Equals(loanId), include: x => (IIncludableQueryable<Loan, object>)x.Include(z => z.BorrowedBook));
         }
 
         public Loan? GetActiveLoanForBook(Guid bookId)
@@ -36,7 +37,7 @@ namespace LibraryApplication.Service.Implementation
         {
             return _loanRepository.GetAll(selector: x => x,
                         predicate: x => (x.UserId == userId) && !x.DateReturned.HasValue,
-                        include: q => q.Include(l => l.BorrowedBook),
+                        include: q => (IIncludableQueryable<Loan, object>)q.Include(l => l.BorrowedBook),
                         asNoTracking: true)
                         .ToList();
         }
@@ -45,7 +46,7 @@ namespace LibraryApplication.Service.Implementation
         {
             return _loanRepository.GetAll(selector: x => x,
                         predicate: x => (x.UserId == userId) && x.DateReturned.HasValue,
-                        include: q => q.Include(l => l.BorrowedBook),
+                        include: q => (IIncludableQueryable<Loan, object>)q.Include(l => l.BorrowedBook),
                         asNoTracking: true)
                         .ToList();
         }
@@ -105,7 +106,7 @@ namespace LibraryApplication.Service.Implementation
             //activate next reservation for the book
             var queue = _reservationService.GetQueueForBook(loan.BorrowedBookId);
             var next = queue.FirstOrDefault(r => !r.IsActive);
-            if (next != null)
+            if (next != null && next.UserId != null)
             {
                 _reservationService.ActivateReservation(next.Id, next.UserId);
             }

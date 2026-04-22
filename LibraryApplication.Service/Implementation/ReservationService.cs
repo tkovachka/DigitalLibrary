@@ -2,6 +2,7 @@
 using LibraryApplication.Repository.Interface;
 using LibraryApplication.Service.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -24,7 +25,7 @@ namespace LibraryApplication.Service.Implementation
         {
             var r = GetById(reservationId);
             if (r == null) throw new Exception("Reservation not found");
-            if (!string.Equals(r.UserId, userId, StringComparison.OrdinalIgnoreCase))
+            if (r.UserId == null || !string.Equals(r.UserId, userId, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Not allowed to cancel this reservation.");
 
             bool isActive = r.IsActive;
@@ -67,7 +68,7 @@ namespace LibraryApplication.Service.Implementation
 
         public List<Reservation> GetReservationsByUser(string userId)
         {
-            return _reservationRepository.GetAll(selector: x => x, predicate: x => x.UserId.Equals(userId), include: x => x.Include(z => z.Book)).ToList();
+            return _reservationRepository.GetAll(selector: x => x, predicate: x => x.UserId != null && x.UserId.Equals(userId), include: x => (IIncludableQueryable<Reservation, object>)x.Include(z => z.Book)).ToList();
         }
 
         public Reservation ReserveBook(Guid bookId, string userId)
@@ -78,7 +79,8 @@ namespace LibraryApplication.Service.Implementation
             if (activeLoan == null) throw new InvalidOperationException("Book is available, reserving not required. Borrow book now!");
 
             var queue = GetQueueForBook(bookId);
-            if (queue.Any(r => string.Equals(r.UserId, userId, StringComparison.OrdinalIgnoreCase)))
+            var existingReservation = queue.FirstOrDefault(r => r.UserId != null && string.Equals(r.UserId, userId, StringComparison.OrdinalIgnoreCase));
+            if (existingReservation != null)
                 throw new InvalidOperationException("You already have a reservation for this book. See status at My Reservations.");
 
             var position = queue.Count + 1;
@@ -104,7 +106,7 @@ namespace LibraryApplication.Service.Implementation
             if (reservation == null)
                 throw new Exception("Reservation not found");
 
-            if (!string.Equals(reservation.UserId, userId, StringComparison.OrdinalIgnoreCase))
+            if (reservation.UserId == null || !string.Equals(reservation.UserId, userId, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Reservation does not belong to this user");
 
             if (reservation.IsActive)
@@ -123,7 +125,7 @@ namespace LibraryApplication.Service.Implementation
             if (reservation == null)
                 throw new Exception("Reservation not found");
 
-            if (!string.Equals(reservation.UserId, userId, StringComparison.OrdinalIgnoreCase))
+            if (reservation.UserId == null || !string.Equals(reservation.UserId, userId, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Reservation does not belong to this user");
 
             var bookId = reservation.BookId;
@@ -148,12 +150,15 @@ namespace LibraryApplication.Service.Implementation
 
         public Reservation? GetById(Guid reservationId)
         {
-            return _reservationRepository.Get(selector: x => x, predicate: x => x.Id == reservationId, include: x => x.Include(z => z.Book).ThenInclude(y => y.Authors));
+#pragma warning disable CS8602
+            return _reservationRepository.Get(selector: x => x, predicate: x => x.Id == reservationId, include: x => (IIncludableQueryable<Reservation, object>)x.Include(z => z.Book).ThenInclude(y => y.Authors));
+#pragma warning restore CS8602
         }
 
         public Reservation? DeleteById(Guid reservationId)
         {
             var r = GetById(reservationId);
+            if (r == null) return null;
             return _reservationRepository.Delete(r);
         }
 

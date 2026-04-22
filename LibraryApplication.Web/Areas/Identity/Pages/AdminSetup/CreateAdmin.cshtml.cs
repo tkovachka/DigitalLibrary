@@ -48,12 +48,6 @@ namespace LibraryApplication.Web.Areas.Identity.Pages.AdminSetup
                 return Page();
             }
 
-            // Ensure Admin role exists
-            if (!await _roleManager.RoleExistsAsync("Admin"))
-            {
-                await _roleManager.CreateAsync(new IdentityRole("Admin"));
-            }
-
             var adminUser = new LibraryApplicationUser
             {
                 UserName = Email,
